@@ -1,0 +1,35 @@
+/vendor/
+/builds
+
+# Environment
+.env
+
+# Composer phar
+composer.phar
+
+# Windows/Mac hidden files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Logs and cache (keep the folder via .gitkeep/index.html placeholders)
+/writable/cache/*
+!/writable/cache/index.html
+/writable/logs/*
+!/writable/logs/index.html
+/writable/session/*
+!/writable/session/index.html
+/writable/uploads/*
+!/writable/uploads/index.html
+/writable/debugbar/*
+!/writable/debugbar/index.html
+
+# PHPUnit
+/phpunit.xml
+/tests/coverage*
+
+# Node (if any frontend tooling gets added later)
+/node_modules/
