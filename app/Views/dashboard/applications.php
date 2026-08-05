@@ -117,7 +117,7 @@
 <?php foreach ($applications as $app): ?>
     <?php if (! $app['has_active_subscription']): ?>
         <div class="kt-modal" data-kt-modal="true" id="subscribe_modal_<?= esc($app['id'], 'attr') ?>">
-            <div class="kt-modal-dialog kt-modal-center">
+            <div class="kt-modal-dialog kt-modal-center kt-modal-open:!flex">
                 <div class="kt-modal-content max-w-[480px]">
                     <div class="kt-modal-header">
                         <h3 class="kt-modal-title">Subscribe "<?= esc($app['name']) ?>"</h3>
