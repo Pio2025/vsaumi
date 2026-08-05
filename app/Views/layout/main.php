@@ -191,7 +191,14 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
         autoWidth: false,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
-        language: { search: '', searchPlaceholder: 'Search…' },
+        language: {
+            search: '',
+            searchPlaceholder: 'Search…',
+            lengthMenu: 'Show _MENU_ per page',
+            info: '_START_-_END_ of _TOTAL_',
+            infoEmpty: '0-0 of 0',
+            infoFiltered: '',
+        },
     });
 
     $(document).on('submit', 'form.js-delete-form', function (e) {
