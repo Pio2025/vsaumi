@@ -187,10 +187,17 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $.extend(true, $.fn.dataTable.defaults, {
-        dom: '<"dt-toolbar"f>rt<"dt-footer"lip>',
+        dom: 'rt<"dt-footer"lip>',
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
         language: { search: '', searchPlaceholder: 'Search…' },
+    });
+
+    $(document).on('keyup', '.js-datatable-search', function () {
+        const target = $(this).data('table');
+        if (target && $.fn.DataTable.isDataTable(target)) {
+            $(target).DataTable().search(this.value).draw();
+        }
     });
 
     $(document).on('submit', 'form.js-delete-form', function (e) {

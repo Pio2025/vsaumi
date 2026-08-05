@@ -10,6 +10,15 @@
 <?= $this->section('content') ?>
 
 <div class="kt-card">
+    <div class="kt-card-header py-5 flex-wrap gap-2">
+        <h3 class="kt-card-title">Payouts (<?= count($payouts) ?>)</h3>
+        <?php if (! empty($payouts)): ?>
+            <label class="kt-input">
+                <i class="ki-filled ki-magnifier"></i>
+                <input class="js-datatable-search" data-table="#payoutsTable" placeholder="Search payouts" type="text">
+            </label>
+        <?php endif; ?>
+    </div>
     <?php if (empty($payouts)): ?>
         <div class="p-5"><p class="text-secondary-foreground mb-0">No payouts have been processed yet.</p></div>
     <?php else: ?>
@@ -18,8 +27,7 @@
                 <table class="kt-table kt-table-border" id="payoutsTable">
                     <thead>
                         <tr>
-                            <th>Payout ID</th>
-                            <th>Merchant</th>
+                            <th class="min-w-[200px]">Merchant</th>
                             <th>Total</th>
                             <th>Fees</th>
                             <th>Net</th>
@@ -30,12 +38,16 @@
                     <tbody>
                         <?php foreach ($payouts as $payout): ?>
                             <tr>
-                                <td class="mono">#<?= esc($payout['id']) ?></td>
-                                <td class="text-foreground font-medium"><?= esc($merchantNames[$payout['merchant_id']] ?? '—') ?></td>
+                                <td>
+                                    <div class="flex flex-col gap-0.5">
+                                        <span class="leading-none font-medium text-sm text-mono"><?= esc($merchantNames[$payout['merchant_id']] ?? '—') ?></span>
+                                        <span class="text-xs text-secondary-foreground font-normal mono">#<?= esc($payout['id']) ?></span>
+                                    </div>
+                                </td>
                                 <td><?= esc(number_format((float) $payout['total_amount'], 2)) ?></td>
                                 <td><?= esc(number_format((float) $payout['fee_amount'], 2)) ?></td>
                                 <td><?= esc(number_format((float) $payout['net_amount'], 2)) ?></td>
-                                <td><span class="kt-badge kt-badge-sm <?= status_badge_class($payout['status']) ?>"><?= esc(ucfirst($payout['status'])) ?></span></td>
+                                <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($payout['status']) ?>"><?= esc(ucfirst($payout['status'])) ?></span></td>
                                 <td><?= esc($payout['payout_date']) ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -50,7 +62,7 @@
 <script>
     $(function () {
         $('#payoutsTable').DataTable({
-            order: [[6, 'desc']],
+            order: [[5, 'desc']],
         });
     });
 </script>
