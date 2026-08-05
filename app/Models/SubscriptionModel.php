@@ -14,6 +14,7 @@ class SubscriptionModel extends Model
 
     protected $allowedFields = [
         'merchant_id',
+        'application_id',
         'plan',
         'amount',
         'status',
@@ -28,12 +29,37 @@ class SubscriptionModel extends Model
 
     public function allForMerchant(int $merchantId): array
     {
-        return $this->where('merchant_id', $merchantId)->orderBy('id', 'DESC')->findAll();
+        return $this->select('subscriptions.*, applications.name as application_name')
+            ->join('applications', 'applications.id = subscriptions.application_id')
+            ->where('subscriptions.merchant_id', $merchantId)
+            ->orderBy('subscriptions.id', 'DESC')
+            ->findAll();
     }
 
     public function hasActiveFor(int $merchantId): bool
     {
         $latest = $this->latestForMerchant($merchantId);
+
+        if ($latest === null || $latest['status'] !== 'active') {
+            return false;
+        }
+
+        return strtotime($latest['expires_at']) > time();
+    }
+
+    public function latestForApplication(int $applicationId): ?array
+    {
+        return $this->where('application_id', $applicationId)->orderBy('id', 'DESC')->first();
+    }
+
+    public function allForApplication(int $applicationId): array
+    {
+        return $this->where('application_id', $applicationId)->orderBy('id', 'DESC')->findAll();
+    }
+
+    public function hasActiveForApplication(int $applicationId): bool
+    {
+        $latest = $this->latestForApplication($applicationId);
 
         if ($latest === null || $latest['status'] !== 'active') {
             return false;

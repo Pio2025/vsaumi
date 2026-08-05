@@ -18,17 +18,10 @@ class MerchantModel extends Model
         'contact_phone',
         'password_hash',
         'status',
-        'api_key',
-        'api_secret_encrypted',
         'bank_account_details',
         'mpaisa_wallet_id',
         'mycash_wallet_id',
     ];
-
-    public function findByApiKey(string $apiKey): ?array
-    {
-        return $this->where('api_key', $apiKey)->first();
-    }
 
     public function findByEmail(string $email): ?array
     {
