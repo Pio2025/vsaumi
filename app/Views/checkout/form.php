@@ -8,7 +8,7 @@
             <h2 class="text-xl font-semibold text-mono"><?= esc(number_format($amount, 2)) ?> FJD</h2>
         </div>
 
-        <form method="post" action="<?= site_url('checkout/' . $merchant['api_key'] . '/pay/' . $method) ?>" class="flex flex-col gap-4 p-7.5">
+        <form method="post" action="<?= site_url('checkout/' . $application['api_key'] . '/pay/' . $method) ?>" class="flex flex-col gap-4 p-7.5">
             <?= csrf_field() ?>
             <input type="hidden" name="amount" value="<?= esc($amount) ?>">
 

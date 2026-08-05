@@ -9,7 +9,7 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
         <?php foreach ($methods as $key => $method): ?>
-            <a class="kt-card items-center text-center p-5 hover:shadow-md transition-shadow" href="<?= site_url('checkout/' . $merchant['api_key'] . '/pay/' . $key . '?amount=' . urlencode((string) $amount)) ?>">
+            <a class="kt-card items-center text-center p-5 hover:shadow-md transition-shadow" href="<?= site_url('checkout/' . $application['api_key'] . '/pay/' . $key . '?amount=' . urlencode((string) $amount)) ?>">
                 <div class="text-2xl mb-2"><?= $method['kind'] === 'card' ? '💳' : '📱' ?></div>
                 <div class="text-sm font-medium text-mono"><?= esc($method['label']) ?></div>
                 <div class="text-xs text-secondary-foreground"><?= $method['kind'] === 'card' ? 'Credit / debit card' : 'Mobile money' ?></div>

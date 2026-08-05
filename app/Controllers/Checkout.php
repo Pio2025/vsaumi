@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\PaymentGateway\Services\PaymentProcessor;
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 use App\Models\TransactionModel;
 
@@ -22,18 +23,34 @@ class Checkout extends BaseController
         'mycash'     => ['label' => 'MyCash', 'kind' => 'mobile'],
     ];
 
-    protected function merchantByApiKey(string $apiKey): ?array
+    /**
+     * Resolves the application a checkout link belongs to. Requires both
+     * the parent merchant (KYC/approval gate) and the application itself
+     * to be active — a suspended merchant shouldn't be able to keep
+     * accepting payments through any of its surviving apps.
+     */
+    protected function applicationByApiKey(string $apiKey): ?array
     {
-        $merchant = model(MerchantModel::class)->where('api_key', $apiKey)->first();
+        $application = model(ApplicationModel::class)->findByApiKey($apiKey);
 
-        return ($merchant !== null && $merchant['status'] === 'active') ? $merchant : null;
+        if ($application === null || $application['status'] !== 'active') {
+            return null;
+        }
+
+        $merchant = model(MerchantModel::class)->find($application['merchant_id']);
+
+        if ($merchant === null || $merchant['status'] !== 'active') {
+            return null;
+        }
+
+        return ['application' => $application, 'merchant' => $merchant];
     }
 
     public function methods(string $apiKey)
     {
-        $merchant = $this->merchantByApiKey($apiKey);
+        $ctx = $this->applicationByApiKey($apiKey);
 
-        if ($merchant === null) {
+        if ($ctx === null) {
             return redirect()->to('/')->with('error', 'This merchant is not available for checkout right now.');
         }
 
@@ -44,39 +61,43 @@ class Checkout extends BaseController
         }
 
         return view('checkout/methods', [
-            'pageTitle' => 'Choose a payment method',
-            'merchant'  => $merchant,
-            'amount'    => $amount,
-            'methods'   => $this->methods,
+            'pageTitle'   => 'Choose a payment method',
+            'merchant'    => $ctx['merchant'],
+            'application' => $ctx['application'],
+            'amount'      => $amount,
+            'methods'     => $this->methods,
         ]);
     }
 
     public function form(string $apiKey, string $method)
     {
-        $merchant = $this->merchantByApiKey($apiKey);
-        $amount   = (float) ($this->request->getGet('amount') ?? 0);
+        $ctx    = $this->applicationByApiKey($apiKey);
+        $amount = (float) ($this->request->getGet('amount') ?? 0);
 
-        if ($merchant === null || $amount <= 0 || ! isset($this->methods[$method])) {
+        if ($ctx === null || $amount <= 0 || ! isset($this->methods[$method])) {
             return redirect()->to('/')->with('error', 'Invalid checkout request.');
         }
 
         return view('checkout/form', [
-            'pageTitle' => $this->methods[$method]['label'] . ' checkout',
-            'merchant'  => $merchant,
-            'amount'    => $amount,
-            'method'    => $method,
-            'methodInfo' => $this->methods[$method],
+            'pageTitle'   => $this->methods[$method]['label'] . ' checkout',
+            'merchant'    => $ctx['merchant'],
+            'application' => $ctx['application'],
+            'amount'      => $amount,
+            'method'      => $method,
+            'methodInfo'  => $this->methods[$method],
         ]);
     }
 
     public function process(string $apiKey, string $method)
     {
-        $merchant = $this->merchantByApiKey($apiKey);
-        $amount   = (float) $this->request->getPost('amount');
+        $ctx    = $this->applicationByApiKey($apiKey);
+        $amount = (float) $this->request->getPost('amount');
 
-        if ($merchant === null || $amount <= 0 || ! isset($this->methods[$method])) {
+        if ($ctx === null || $amount <= 0 || ! isset($this->methods[$method])) {
             return redirect()->to('/')->with('error', 'Invalid checkout request.');
         }
+
+        $merchant = $ctx['merchant'];
 
         $data = [
             'amount'   => $amount,
