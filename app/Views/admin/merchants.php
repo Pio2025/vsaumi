@@ -8,7 +8,7 @@
 
 
 
-<div class="kt-card">
+<div class="kt-card kt-card-grid">
     <div class="kt-card-header py-5 flex-wrap gap-2">
         <h3 class="kt-card-title">Merchants (<?= count($merchants) ?>)</h3>
         <?php if (! empty($merchants)): ?>
@@ -21,7 +21,7 @@
     <?php if (empty($merchants)): ?>
         <div class="p-5"><p class="text-secondary-foreground mb-0">No merchants have signed up yet.</p></div>
     <?php else: ?>
-        <div class="kt-card-table">
+        <div class="kt-card-content">
             <div class="kt-scrollable-x-auto">
                 <table class="kt-table kt-table-border" id="merchantsTable">
                     <thead>
