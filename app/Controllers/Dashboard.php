@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 use App\Models\PayoutModel;
 use App\Models\SubscriptionModel;
@@ -9,12 +10,6 @@ use App\Models\TransactionModel;
 
 class Dashboard extends BaseController
 {
-    protected array $plans = [
-        'starter'    => ['label' => 'Starter', 'price' => 29, 'note' => 'Up to 500 transactions/mo'],
-        'growth'     => ['label' => 'Growth', 'price' => 79, 'note' => 'Up to 5,000 transactions/mo'],
-        'enterprise' => ['label' => 'Enterprise', 'price' => 199, 'note' => 'Unlimited, priority support'],
-    ];
-
     protected function currentMerchant(): array
     {
         return model(MerchantModel::class)->find(session()->get('merchant_id'));
@@ -37,36 +32,9 @@ class Dashboard extends BaseController
             'merchant'     => $merchant,
             'stats'        => $stats,
             'subscription' => model(SubscriptionModel::class)->latestForMerchant($merchant['id']),
+            'applications' => model(ApplicationModel::class)->allForMerchant($merchant['id']),
             'newApplicationCredentials' => session()->getFlashdata('new_application_credentials'),
-            'plans'        => $this->plans,
         ]);
-    }
-
-    public function subscribe()
-    {
-        $plan = $this->request->getPost('plan');
-        $merchant = $this->currentMerchant();
-
-        if (! isset($this->plans[$plan])) {
-            return redirect()->to('/dashboard')->with('error', 'Please choose a valid plan.');
-        }
-
-        if (! in_array($merchant['status'], ['pending', 'approved', 'suspended'], true)) {
-            return redirect()->to('/dashboard')->with('error', 'Subscription already active.');
-        }
-
-        model(SubscriptionModel::class)->insert([
-            'merchant_id' => $merchant['id'],
-            'plan'        => $plan,
-            'amount'      => $this->plans[$plan]['price'],
-            'status'      => 'active',
-            'started_at'  => date('Y-m-d H:i:s'),
-            'expires_at'  => date('Y-m-d H:i:s', strtotime('+30 days')),
-        ]);
-
-        model(MerchantModel::class)->update($merchant['id'], ['status' => 'active']);
-
-        return redirect()->to('/dashboard')->with('success', "Subscribed to the {$this->plans[$plan]['label']} plan (simulated payment). Your API is now live for 30 days.");
     }
 
     public function subscriptions()

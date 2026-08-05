@@ -29,21 +29,9 @@
 <?php elseif (in_array($merchant['status'], ['approved', 'suspended'], true)): ?>
     <div class="kt-card">
         <div class="kt-card-content p-6">
-            <h3 class="text-base font-medium text-mono mb-1.5"><?= $merchant['status'] === 'suspended' ? 'Renew your subscription' : "You're approved — choose a plan" ?></h3>
-            <p class="text-2sm text-secondary-foreground mb-5">This charges nothing real — it's a simulated payment that activates your API access for 30 days, standing in for the real subscription billing described in the design doc.</p>
-            <form method="post" action="<?= site_url('dashboard/subscribe') ?>">
-                <?= csrf_field() ?>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                    <?php foreach ($plans as $key => $plan): ?>
-                        <label class="kt-card cursor-pointer has-[:checked]:border-primary p-4">
-                            <input type="radio" name="plan" value="<?= esc($key) ?>" class="kt-radio mb-2" <?= $key === 'starter' ? 'checked' : '' ?>>
-                            <div class="font-medium text-mono"><?= esc($plan['label']) ?> — $<?= esc($plan['price']) ?>/mo</div>
-                            <div class="text-xs text-secondary-foreground"><?= esc($plan['note']) ?></div>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-                <button type="submit" class="kt-btn kt-btn-mono mt-5">Simulate Payment &amp; Activate</button>
-            </form>
+            <h3 class="text-base font-medium text-mono mb-1.5"><?= $merchant['status'] === 'suspended' ? 'Renew your subscription' : "You're approved — activate an application" ?></h3>
+            <p class="text-2sm text-secondary-foreground mb-5">Subscribe one of your applications to a plan to activate your API access. This charges nothing real — it's a simulated payment, standing in for the real subscription billing described in the design doc.</p>
+            <a href="<?= site_url('dashboard/applications') ?>" class="kt-btn kt-btn-mono">Go to Applications</a>
         </div>
     </div>
 
@@ -82,27 +70,59 @@
 
     <div class="kt-card mt-5 lg:mt-7.5">
         <div class="kt-card-content p-6">
-            <h3 class="text-base font-medium text-mono mb-1.5">Try a demo checkout</h3>
-            <p class="text-2sm text-secondary-foreground mb-4">This simulates a customer landing on your storefront's "Pay with VSaumi" button — pick an amount and open it.</p>
-            <form method="get" action="<?= site_url('checkout/' . $merchant['api_key']) ?>" target="_blank" class="flex flex-wrap items-end gap-3.5">
-                <div class="flex flex-col gap-1">
-                    <label class="kt-form-label font-normal text-mono" for="amount">Amount (FJD)</label>
-                    <input class="kt-input w-40" type="number" id="amount" name="amount" value="50.00" min="1" step="0.01">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-medium text-mono">Applications</h3>
+                <a href="<?= site_url('dashboard/applications') ?>" class="kt-btn kt-btn-sm kt-btn-outline">Manage applications</a>
+            </div>
+            <?php if (empty($applications)): ?>
+                <p class="text-2sm text-secondary-foreground mb-0">No applications yet.</p>
+            <?php else: ?>
+                <div class="flex flex-col gap-2.5">
+                    <?php foreach ($applications as $app): ?>
+                        <div class="flex items-center justify-between border border-border rounded-lg px-3.5 py-2.5">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-sm font-medium text-mono"><?= esc($app['name']) ?></span>
+                                <span class="text-xs text-secondary-foreground mono"><?= esc($app['api_key']) ?></span>
+                            </div>
+                            <span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($app['status']) ?>"><?= esc(ucfirst($app['status'])) ?></span>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-                <button type="submit" class="kt-btn kt-btn-primary">Open Demo Checkout</button>
-            </form>
+            <?php endif; ?>
         </div>
     </div>
 
-    <div class="kt-card mt-5 lg:mt-7.5">
-        <div class="kt-card-content p-6">
-            <h3 class="text-base font-medium text-mono mb-3">API Credentials</h3>
-            <div class="credential-box">
-                <div class="row"><span class="text-2sm text-secondary-foreground">API Key</span><span class="mono"><?= esc($merchant['api_key']) ?></span></div>
+    <?php if (! empty($applications)): ?>
+        <div class="kt-card mt-5 lg:mt-7.5">
+            <div class="kt-card-content p-6">
+                <h3 class="text-base font-medium text-mono mb-1.5">Try a demo checkout</h3>
+                <p class="text-2sm text-secondary-foreground mb-4">This simulates a customer landing on your storefront's "Pay with VSaumi" button — pick an application, an amount, and open it.</p>
+                <form method="get" action="<?= site_url('checkout/' . $applications[0]['api_key']) ?>" target="_blank" id="demoCheckoutForm" class="flex flex-wrap items-end gap-3.5">
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="app_picker">Application</label>
+                        <select class="kt-select w-52" id="app_picker">
+                            <?php foreach ($applications as $app): ?>
+                                <option value="<?= esc($app['api_key'], 'attr') ?>"><?= esc($app['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="amount">Amount (FJD)</label>
+                        <input class="kt-input w-40" type="number" id="amount" name="amount" value="50.00" min="1" step="0.01">
+                    </div>
+                    <button type="submit" class="kt-btn kt-btn-primary">Open Demo Checkout</button>
+                </form>
             </div>
-            <p class="text-xs text-secondary-foreground mt-2 mb-0">Your API secret was shown once at signup and is stored encrypted — it can't be displayed again. Contact support to rotate it.</p>
         </div>
-    </div>
+    <?php endif; ?>
 <?php endif; ?>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+    document.getElementById('app_picker')?.addEventListener('change', function () {
+        document.getElementById('demoCheckoutForm').action = '<?= site_url('checkout') ?>/' + this.value;
+    });
+</script>
 <?= $this->endSection() ?>

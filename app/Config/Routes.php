@@ -15,7 +15,10 @@ $routes->get('logout', 'Auth::logout');
 // --- Merchant dashboard (session auth) ---
 $routes->group('dashboard', ['filter' => 'merchantAuth'], static function (RouteCollection $routes) {
     $routes->get('/', 'Dashboard::index');
-    $routes->post('subscribe', 'Dashboard::subscribe');
+    $routes->get('applications', 'ApplicationController::index');
+    $routes->get('applications/new', 'ApplicationController::newForm');
+    $routes->post('applications/new', 'ApplicationController::create');
+    $routes->post('applications/(:num)/subscribe', 'ApplicationController::subscribe/$1');
     $routes->get('transactions', 'Dashboard::transactions');
     $routes->get('payouts', 'Dashboard::payouts');
     $routes->get('subscriptions', 'Dashboard::subscriptions');

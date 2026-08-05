@@ -93,7 +93,7 @@ class Merchant extends BaseController
         $merchant    = ApiContext::merchant();
         $application = ApiContext::application();
 
-        unset($application['api_secret_encrypted']);
+        unset($application['api_secret_encrypted'], $merchant['password_hash'], $merchant['api_secret_encrypted']);
 
         return $this->response->setJSON([
             'merchant'    => $merchant,

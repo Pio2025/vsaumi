@@ -15,6 +15,7 @@ if ($isAdmin) {
 } elseif ($isMerchant) {
     $navItems = [
         ['label' => 'Dashboard', 'icon' => 'home', 'url' => 'dashboard', 'match' => 'dashboard'],
+        ['label' => 'Applications', 'icon' => 'code', 'url' => 'dashboard/applications', 'match' => 'dashboard/applications'],
         ['label' => 'Transactions', 'icon' => 'bill', 'url' => 'dashboard/transactions', 'match' => 'dashboard/transactions'],
         ['label' => 'Payouts', 'icon' => 'wallet', 'url' => 'dashboard/payouts', 'match' => 'dashboard/payouts'],
         ['label' => 'Subscriptions', 'icon' => 'crown', 'url' => 'dashboard/subscriptions', 'match' => 'dashboard/subscriptions'],

@@ -24,6 +24,12 @@
                     <table class="kt-table kt-table-border" data-kt-datatable-table="true">
                         <thead>
                             <tr>
+                                <th class="min-w-[160px]">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Application</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
                                 <th>
                                     <span class="kt-table-col">
                                         <span class="kt-table-col-label">Plan</span>
@@ -59,6 +65,7 @@
                         <tbody>
                             <?php foreach ($subscriptions as $sub): ?>
                                 <tr>
+                                    <td class="text-mono font-medium"><?= esc($sub['application_name'] ?? '—') ?></td>
                                     <td class="text-mono font-medium"><?= esc(ucfirst($sub['plan'])) ?></td>
                                     <td><?= esc(number_format((float) $sub['amount'], 2)) ?> FJD</td>
                                     <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($sub['status']) ?>"><?= esc(ucfirst($sub['status'])) ?></span></td>
