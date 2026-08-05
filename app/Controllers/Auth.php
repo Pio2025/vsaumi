@@ -25,7 +25,19 @@ class Auth extends BaseController
             'password'      => 'required|min_length[8]',
         ];
 
-        if (! $this->validate($rules)) {
+        $messages = [
+            'business_name' => [
+                'is_unique' => 'This business name is already registered. Please choose a different name.',
+            ],
+            'contact_email' => [
+                'is_unique' => 'This email address is already registered to a business. Please log in or use a different email.',
+            ],
+            'contact_phone' => [
+                'is_unique' => 'This phone number is already registered to a business. Please use a different phone number.',
+            ],
+        ];
+
+        if (! $this->validate($rules, $messages)) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 

@@ -125,7 +125,19 @@ class Dashboard extends BaseController
             'status'        => 'required|in_list[pending,approved,active,suspended]',
         ];
 
-        if (! $this->validate($rules)) {
+        $messages = [
+            'business_name' => [
+                'is_unique' => 'This business name is already registered to another merchant.',
+            ],
+            'contact_email' => [
+                'is_unique' => 'This email address is already registered to another merchant.',
+            ],
+            'contact_phone' => [
+                'is_unique' => 'This phone number is already registered to another merchant.',
+            ],
+        ];
+
+        if (! $this->validate($rules, $messages)) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 

@@ -34,6 +34,12 @@
   .lg\:text-5xl { font-size: 3rem; line-height: 1; }
 }
 
+/* ---- Public nav mobile drawer: native <details> accordion ---- */
+.kt-drawer-content details > summary { list-style: none; }
+.kt-drawer-content details > summary::-webkit-details-marker { display: none; }
+.kt-drawer-content details > summary i { transition: transform 150ms ease; }
+.kt-drawer-content details[open] > summary i { transform: rotate(180deg); }
+
 .mono {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.85rem;
