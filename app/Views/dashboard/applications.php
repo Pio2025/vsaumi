@@ -88,28 +88,9 @@
                                         <?php if ($app['has_active_subscription']): ?>
                                             <span class="text-2sm text-secondary-foreground">—</span>
                                         <?php else: ?>
-                                            <div class="flex items-center justify-end gap-1.5">
-                                                <div class="kt-menu" data-kt-menu="true">
-                                                    <div class="kt-menu-item" data-kt-menu-item-offset="0, 10px" data-kt-menu-item-placement="bottom-end" data-kt-menu-item-placement-rtl="bottom-start" data-kt-menu-item-toggle="dropdown" data-kt-menu-item-trigger="click">
-                                                        <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-outline" type="button">
-                                                            Subscribe
-                                                        </button>
-                                                        <div class="kt-menu-dropdown kt-menu-default w-full max-w-[220px]" data-kt-menu-dismiss="true">
-                                                            <div class="kt-menu-item">
-                                                                <form method="post" action="<?= site_url('dashboard/applications/' . $app['id'] . '/subscribe') ?>" class="w-full flex flex-col gap-2 p-2.5">
-                                                                    <?= csrf_field() ?>
-                                                                    <select name="plan" class="kt-select kt-select-sm w-full">
-                                                                        <?php foreach ($plans as $key => $plan): ?>
-                                                                            <option value="<?= esc($key) ?>"><?= esc($plan['label']) ?> ($<?= esc($plan['price']) ?>/mo)</option>
-                                                                        <?php endforeach; ?>
-                                                                    </select>
-                                                                    <button type="submit" class="kt-btn kt-btn-sm kt-btn-mono w-full">Simulate Payment</button>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <button type="button" class="kt-btn kt-btn-sm kt-btn-outline" data-kt-modal-toggle="#subscribe_modal_<?= esc($app['id'], 'attr') ?>">
+                                                Subscribe
+                                            </button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -132,5 +113,39 @@
         </div>
     <?php endif; ?>
 </div>
+
+<?php foreach ($applications as $app): ?>
+    <?php if (! $app['has_active_subscription']): ?>
+        <div class="kt-modal" data-kt-modal="true" id="subscribe_modal_<?= esc($app['id'], 'attr') ?>">
+            <div class="kt-modal-dialog kt-modal-center">
+                <div class="kt-modal-content max-w-[480px]">
+                    <div class="kt-modal-header">
+                        <h3 class="kt-modal-title">Subscribe "<?= esc($app['name']) ?>"</h3>
+                        <button class="kt-modal-close" data-kt-modal-dismiss="true" type="button">
+                            <i class="ki-filled ki-cross"></i>
+                        </button>
+                    </div>
+                    <form method="post" action="<?= site_url('dashboard/applications/' . $app['id'] . '/subscribe') ?>">
+                        <?= csrf_field() ?>
+                        <div class="kt-modal-body flex flex-col gap-3.5">
+                            <p class="text-2sm text-secondary-foreground mb-0">This charges nothing real — it's a simulated payment that activates this application's API access for 30 days.</p>
+                            <?php foreach ($plans as $key => $plan): ?>
+                                <label class="kt-card cursor-pointer has-[:checked]:border-primary p-4">
+                                    <input type="radio" name="plan" value="<?= esc($key) ?>" class="kt-radio mb-2" <?= $key === 'starter' ? 'checked' : '' ?>>
+                                    <div class="font-medium text-mono"><?= esc($plan['label']) ?> — $<?= esc($plan['price']) ?>/mo</div>
+                                    <div class="text-xs text-secondary-foreground"><?= esc($plan['note']) ?></div>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="kt-modal-footer">
+                            <button type="button" class="kt-btn kt-btn-outline" data-kt-modal-dismiss="true">Cancel</button>
+                            <button type="submit" class="kt-btn kt-btn-mono">Simulate Payment &amp; Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>
 
 <?= $this->endSection() ?>
