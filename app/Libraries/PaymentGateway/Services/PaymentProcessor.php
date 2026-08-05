@@ -47,9 +47,33 @@ class PaymentProcessor
         return [
             'transaction_id' => $transactionId,
             'reference'      => $reference,
+            'psp_reference'  => $result['psp_reference'] ?? null,
             'status'         => $result['status'] ?? 'pending',
             'message'        => $result['message'] ?? '',
         ];
+    }
+
+    /**
+     * Demo-mode only: simulate a provider's outcome for a transaction we
+     * initiated ourselves, without a real webhook round-trip. Used by the
+     * browser checkout flow to stand in for "customer approved on their
+     * phone" / "card issuer authorized" until real provider APIs are wired
+     * up — at which point this is replaced by genuine applyWebhook() calls
+     * arriving from Vodafone/Digicel/the card processor.
+     *
+     * @param 'captured'|'failed' $outcome
+     */
+    public function confirmDemoPayment(string $reference, string $outcome): array
+    {
+        $transaction = $this->transactions->findByReference($reference);
+
+        if ($transaction === null) {
+            throw new RuntimeException("No transaction found for reference: {$reference}");
+        }
+
+        $this->transactions->update($transaction['id'], ['status' => $outcome]);
+
+        return $this->transactions->find($transaction['id']);
     }
 
     /**

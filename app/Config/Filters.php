@@ -2,7 +2,9 @@
 
 namespace Config;
 
+use App\Filters\AdminAuthFilter;
 use App\Filters\ApiAuthFilter;
+use App\Filters\MerchantAuthFilter;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
 use CodeIgniter\Filters\CSRF;
@@ -36,6 +38,8 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'apiAuth'       => ApiAuthFilter::class,
+        'merchantAuth'  => MerchantAuthFilter::class,
+        'adminAuth'     => AdminAuthFilter::class,
     ];
 
     /**
@@ -75,7 +79,7 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            // 'csrf',
+            'csrf' => ['except' => ['api/*']],
             // 'invalidchars',
         ],
         'after' => [

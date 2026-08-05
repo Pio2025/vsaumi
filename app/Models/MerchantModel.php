@@ -16,11 +16,10 @@ class MerchantModel extends Model
         'business_name',
         'contact_email',
         'contact_phone',
+        'password_hash',
         'status',
         'api_key',
         'api_secret_encrypted',
-        'subscription_plan',
-        'subscription_expiry',
         'bank_account_details',
         'mpaisa_wallet_id',
         'mycash_wallet_id',
@@ -31,16 +30,22 @@ class MerchantModel extends Model
         return $this->where('api_key', $apiKey)->first();
     }
 
+    public function findByEmail(string $email): ?array
+    {
+        return $this->where('contact_email', $email)->first();
+    }
+
+    public function verifyPassword(array $merchant, string $password): bool
+    {
+        return password_verify($password, $merchant['password_hash']);
+    }
+
     public function isSubscriptionActive(array $merchant): bool
     {
         if ($merchant['status'] !== 'active') {
             return false;
         }
 
-        if (empty($merchant['subscription_expiry'])) {
-            return false;
-        }
-
-        return strtotime($merchant['subscription_expiry']) > time();
+        return model(SubscriptionModel::class)->hasActiveFor($merchant['id']);
     }
 }

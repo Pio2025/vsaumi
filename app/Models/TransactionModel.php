@@ -42,4 +42,20 @@ class TransactionModel extends Model
             ->where('payout_id', null)
             ->findAll();
     }
+
+    /**
+     * Distinct merchant IDs that currently have settled, unpaid transactions.
+     *
+     * @return list<int>
+     */
+    public function merchantIdsWithUnpaidSettlement(): array
+    {
+        $rows = $this->select('merchant_id')
+            ->where('status', 'settled')
+            ->where('payout_id', null)
+            ->groupBy('merchant_id')
+            ->findAll();
+
+        return array_map(static fn (array $row) => (int) $row['merchant_id'], $rows);
+    }
 }

@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
+use App\Models\MerchantModel;
+
+class Auth extends BaseController
+{
+    public function signupForm()
+    {
+        if (session()->get('merchant_id')) {
+            return redirect()->to('/dashboard');
+        }
+
+        return view('auth/signup', ['pageTitle' => 'Sign Up']);
+    }
+
+    public function signup()
+    {
+        $rules = [
+            'business_name' => 'required|min_length[2]|max_length[150]|is_unique[merchants.business_name]',
+            'contact_email' => 'required|valid_email|is_unique[merchants.contact_email]',
+            'contact_phone' => 'permit_empty|max_length[30]|is_unique[merchants.contact_phone]',
+            'password'      => 'required|min_length[8]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
+        }
+
+        $merchants   = model(MerchantModel::class);
+        $plainSecret = SecurityHelper::generateSecret();
+
+        $merchantId = $merchants->insert([
+            'business_name'        => $this->request->getPost('business_name'),
+            'contact_email'        => $this->request->getPost('contact_email'),
+            'contact_phone'        => $this->request->getPost('contact_phone') ?: null,
+            'password_hash'        => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'status'                => 'pending',
+            'api_key'               => SecurityHelper::generateApiKey(),
+            'api_secret_encrypted'  => SecurityHelper::encryptSecret($plainSecret),
+        ], true);
+
+        $merchant = $merchants->find($merchantId);
+
+        session()->set([
+            'merchant_id'   => $merchant['id'],
+            'merchant_name' => $merchant['business_name'],
+        ]);
+
+        session()->setFlashdata('api_secret_once', $plainSecret);
+
+        return redirect()->to('/dashboard')->with('success', 'Account created — an admin needs to approve it before you can go live.');
+    }
+
+    public function loginForm()
+    {
+        if (session()->get('merchant_id')) {
+            return redirect()->to('/dashboard');
+        }
+
+        return view('auth/login', ['pageTitle' => 'Log In']);
+    }
+
+    public function login()
+    {
+        $email    = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
+
+        $merchants = model(MerchantModel::class);
+        $merchant  = $merchants->findByEmail((string) $email);
+
+        if ($merchant === null || ! $merchants->verifyPassword($merchant, (string) $password)) {
+            return redirect()->back()->withInput()->with('error', 'Invalid email or password.');
+        }
+
+        session()->set([
+            'merchant_id'   => $merchant['id'],
+            'merchant_name' => $merchant['business_name'],
+        ]);
+
+        return redirect()->to('/dashboard');
+    }
+
+    public function logout()
+    {
+        session()->remove(['merchant_id', 'merchant_name']);
+
+        return redirect()->to('/')->with('success', 'You have been logged out.');
+    }
+}

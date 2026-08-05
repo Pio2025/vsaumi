@@ -1,0 +1,182 @@
+/* VSaumi-specific additions on top of the Metronic theme (styles.css).
+   Only things the theme doesn't already provide live here. */
+
+/* ---- Tailwind utility shims -----------------------------------------
+   styles.css is an ahead-of-time compiled build: only class combinations
+   that literally appear in the original demo HTML exist in it. These
+   utilities are used by VSaumi views but weren't in the demo pages we
+   copied from, so they're defined here by hand (same names/behavior as
+   the Tailwind utilities they stand in for). */
+.mt-1\.5 { margin-top: 0.375rem; }
+.mt-7\.5 { margin-top: 1.875rem; }
+.p-6 { padding: 1.5rem; }
+.pb-16 { padding-bottom: 4rem; }
+.shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+.transition-shadow { transition-property: box-shadow; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+.hover\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+.w-auto { width: auto; }
+.max-w-\[640px\] { max-width: 640px; }
+.max-w-\[960px\] { max-width: 960px; }
+.max-h-\[30px\] { max-height: 30px; }
+.has-\[\:checked\]\:border-primary:has(:checked) { border-color: var(--primary); }
+.text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+.leading-tight { line-height: 1.25; }
+.tracking-wide { letter-spacing: 0.025em; }
+@media (min-width: 40rem) {
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 48rem) {
+  .md\:inline-flex { display: inline-flex; }
+}
+@media (min-width: 64rem) {
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:mt-7\.5 { margin-top: 1.875rem; }
+  .lg\:text-5xl { font-size: 3rem; line-height: 1; }
+}
+
+.mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+.credential-box {
+  background: color-mix(in oklab, var(--primary) 8%, var(--background));
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border));
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.credential-box .row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; gap: 12px; }
+.credential-box .row + .row { border-top: 1px dashed var(--border); }
+
+.phone-mock {
+  max-width: 320px;
+  margin: 0 auto;
+  border: 8px solid var(--foreground);
+  border-radius: 28px;
+  padding: 20px 16px;
+  background: var(--card);
+}
+.phone-mock .carrier { font-size: 0.75rem; color: var(--muted-foreground); text-align: center; margin-bottom: 12px; }
+.phone-mock .prompt-box {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--background);
+}
+
+/* ---- DataTables (classic jQuery plugin) reskinned to match Metronic ---- */
+.dataTables_wrapper { font-family: inherit; font-size: 0.875rem; color: var(--foreground); }
+
+.dataTables_wrapper .dt-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.dataTables_wrapper .dataTables_filter { margin: 0; }
+.dataTables_wrapper .dataTables_filter label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+.dataTables_wrapper .dataTables_filter input { margin: 0; min-width: 220px; }
+
+.dataTables_wrapper .dt-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.dataTables_wrapper .dt-footer .dataTables_length,
+.dataTables_wrapper .dt-footer .dataTables_info,
+.dataTables_wrapper .dt-footer .dataTables_paginate { margin: 0; }
+.dataTables_wrapper .dataTables_length label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+.dataTables_wrapper .dataTables_length select { margin: 0; width: auto; }
+
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+.dataTables_wrapper .dataTables_filter input:focus,
+.dataTables_wrapper .dataTables_length select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+table.dataTable thead th {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border) !important;
+}
+table.dataTable tbody td { border-bottom: 1px solid var(--border); padding: 10px 12px; }
+table.dataTable.no-footer { border-bottom: none; }
+
+.dataTables_wrapper .dataTables_paginate { display: flex; gap: 4px; }
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: calc(var(--radius) - 2px) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  padding: 0 10px !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+  opacity: 0.4;
+  background: var(--background) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+  cursor: not-allowed;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+  background: color-mix(in oklab, var(--primary) 10%, transparent) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+.dataTables_wrapper .dataTables_info { color: var(--muted-foreground); font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .dataTables_wrapper .dt-toolbar { justify-content: stretch; }
+  .dataTables_wrapper .dataTables_filter label { width: 100%; }
+  .dataTables_wrapper .dataTables_filter input { flex: 1; min-width: 0; }
+  .dataTables_wrapper .dt-footer { flex-direction: column; align-items: stretch; }
+}
