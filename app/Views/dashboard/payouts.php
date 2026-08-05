@@ -11,7 +11,7 @@
         <?php if (! empty($payouts)): ?>
             <label class="kt-input">
                 <i class="ki-filled ki-magnifier"></i>
-                <input class="js-datatable-search" data-table="#payoutsTable" placeholder="Search payouts" type="text">
+                <input data-kt-datatable-search="#payoutsTable" placeholder="Search payouts" type="text" value="">
             </label>
         <?php endif; ?>
     </div>
@@ -19,40 +19,63 @@
         <div class="p-5"><p class="text-secondary-foreground mb-0">No payouts yet. Payouts are created once your settled transactions are batched by an admin.</p></div>
     <?php else: ?>
         <div class="kt-card-content">
-            <div class="kt-scrollable-x-auto">
-                <table class="kt-table kt-table-border" id="payoutsTable">
-                    <thead>
-                        <tr>
-                            <th>Payout ID</th>
-                            <th>Net Amount</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($payouts as $payout): ?>
+            <div class="grid" data-kt-datatable="true" data-kt-datatable-page-size="10" id="payoutsTable">
+                <div class="kt-scrollable-x-auto">
+                    <table class="kt-table kt-table-border" data-kt-datatable-table="true">
+                        <thead>
                             <tr>
-                                <td class="mono">#<?= esc($payout['id']) ?></td>
-                                <td><?= esc(number_format((float) $payout['net_amount'], 2)) ?></td>
-                                <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($payout['status']) ?>"><?= esc(ucfirst($payout['status'])) ?></span></td>
-                                <td><?= esc($payout['created_at']) ?></td>
+                                <th>
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Payout ID</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Net Amount</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Status</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Created</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($payouts as $payout): ?>
+                                <tr>
+                                    <td class="mono">#<?= esc($payout['id']) ?></td>
+                                    <td><?= esc(number_format((float) $payout['net_amount'], 2)) ?></td>
+                                    <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($payout['status']) ?>"><?= esc(ucfirst($payout['status'])) ?></span></td>
+                                    <td><?= esc($payout['created_at']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="kt-card-footer justify-center md:justify-between flex-col md:flex-row gap-5 text-secondary-foreground text-sm font-medium">
+                    <div class="flex items-center gap-2 order-2 md:order-1">
+                        Show
+                        <select class="kt-select w-16" data-kt-datatable-size="true" data-kt-select="" name="perpage"></select>
+                        per page
+                    </div>
+                    <div class="flex items-center gap-4 order-1 md:order-2">
+                        <span data-kt-datatable-info="true"></span>
+                        <div class="kt-datatable-pagination" data-kt-datatable-pagination="true"></div>
+                    </div>
+                </div>
             </div>
         </div>
     <?php endif; ?>
 </div>
-
-<?= $this->section('scripts') ?>
-<script>
-    $(function () {
-        $('#payoutsTable').DataTable({
-            order: [[3, 'desc']],
-        });
-    });
-</script>
-<?= $this->endSection() ?>
 
 <?= $this->endSection() ?>
