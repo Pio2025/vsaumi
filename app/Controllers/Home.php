@@ -2,13 +2,17 @@
 
 namespace App\Controllers;
 
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 
 class Home extends BaseController
 {
     public function index(): string
     {
-        $demoMerchant = model(MerchantModel::class)->findByEmail('demo@vsaumi.fj');
+        $demoMerchant     = model(MerchantModel::class)->findByEmail('demo@vsaumi.fj');
+        $demoApplication  = $demoMerchant
+            ? model(ApplicationModel::class)->where('merchant_id', $demoMerchant['id'])->orderBy('id', 'ASC')->first()
+            : null;
 
         $plans = [
             'starter'    => ['label' => 'Starter', 'price' => 29, 'note' => 'Up to 500 transactions/mo', 'features' => ['All payment methods', 'Standard settlement', 'Email support']],
@@ -18,7 +22,7 @@ class Home extends BaseController
 
         return view('home', [
             'pageTitle'   => 'Home',
-            'demoApiKey'  => $demoMerchant['api_key'] ?? null,
+            'demoApiKey'  => $demoApplication['api_key'] ?? null,
             'plans'       => $plans,
         ]);
     }
