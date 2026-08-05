@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 
 class Auth extends BaseController
@@ -23,6 +24,8 @@ class Auth extends BaseController
             'contact_email' => 'required|valid_email|is_unique[merchants.contact_email]',
             'contact_phone' => 'permit_empty|max_length[30]|is_unique[merchants.contact_phone]',
             'password'      => 'required|min_length[8]',
+            'app_name'      => 'required|min_length[2]|max_length[150]',
+            'website_url'   => 'permit_empty|valid_url_strict|max_length[255]',
         ];
 
         $messages = [
@@ -41,18 +44,36 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $merchants   = model(MerchantModel::class);
-        $plainSecret = SecurityHelper::generateSecret();
+        $merchants    = model(MerchantModel::class);
+        $applications = model(ApplicationModel::class);
+        $plainSecret  = SecurityHelper::generateSecret();
+        $apiKey       = SecurityHelper::generateApiKey();
+
+        $db = db_connect();
+        $db->transStart();
 
         $merchantId = $merchants->insert([
-            'business_name'        => $this->request->getPost('business_name'),
-            'contact_email'        => $this->request->getPost('contact_email'),
-            'contact_phone'        => $this->request->getPost('contact_phone') ?: null,
-            'password_hash'        => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'status'                => 'pending',
-            'api_key'               => SecurityHelper::generateApiKey(),
+            'business_name' => $this->request->getPost('business_name'),
+            'contact_email' => $this->request->getPost('contact_email'),
+            'contact_phone' => $this->request->getPost('contact_phone') ?: null,
+            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'status'        => 'pending',
+        ], true);
+
+        $applicationId = $applications->insert([
+            'merchant_id'           => $merchantId,
+            'name'                  => $this->request->getPost('app_name'),
+            'website_url'           => $this->request->getPost('website_url') ?: null,
+            'status'                => 'active',
+            'api_key'               => $apiKey,
             'api_secret_encrypted'  => SecurityHelper::encryptSecret($plainSecret),
         ], true);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Could not create your account. Please try again.');
+        }
 
         $merchant = $merchants->find($merchantId);
 
@@ -61,7 +82,12 @@ class Auth extends BaseController
             'merchant_name' => $merchant['business_name'],
         ]);
 
-        session()->setFlashdata('api_secret_once', $plainSecret);
+        session()->setFlashdata('new_application_credentials', [
+            'application_id' => $applicationId,
+            'name'           => $this->request->getPost('app_name'),
+            'api_key'        => $apiKey,
+            'api_secret'     => $plainSecret,
+        ]);
 
         return redirect()->to('/dashboard')->with('success', 'Account created — an admin needs to approve it before you can go live.');
     }

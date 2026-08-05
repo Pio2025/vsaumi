@@ -5,14 +5,14 @@
 
 <?= $this->section('content') ?>
 
-<?php if ($apiSecretOnce): ?>
+<?php if ($newApplicationCredentials): ?>
     <div class="kt-card border-primary mb-5 lg:mb-7.5">
         <div class="kt-card-content p-6">
-            <h3 class="text-base font-medium text-mono mb-1.5">Your API credentials</h3>
+            <h3 class="text-base font-medium text-mono mb-1.5">Credentials for "<?= esc($newApplicationCredentials['name']) ?>"</h3>
             <p class="text-2sm text-secondary-foreground mb-3">Save your API secret now — it will not be shown again.</p>
             <div class="credential-box">
-                <div class="row"><span class="text-2sm text-secondary-foreground">API Key</span><span class="mono"><?= esc($merchant['api_key']) ?></span></div>
-                <div class="row"><span class="text-2sm text-secondary-foreground">API Secret</span><span class="mono"><?= esc($apiSecretOnce) ?></span></div>
+                <div class="row"><span class="text-2sm text-secondary-foreground">API Key</span><span class="mono"><?= esc($newApplicationCredentials['api_key']) ?></span></div>
+                <div class="row"><span class="text-2sm text-secondary-foreground">API Secret</span><span class="mono"><?= esc($newApplicationCredentials['api_secret']) ?></span></div>
             </div>
         </div>
     </div>

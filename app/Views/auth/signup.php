@@ -29,6 +29,17 @@
             </div>
 
             <div class="flex flex-col gap-1">
+                <label class="kt-form-label font-normal text-mono" for="app_name">App or website name</label>
+                <input class="kt-input" type="text" id="app_name" name="app_name" value="<?= esc(old('app_name'), 'attr') ?>" placeholder="My Kava" required>
+                <span class="text-2sm text-secondary-foreground">The first app that will call the payment API — you can add more later.</span>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="kt-form-label font-normal text-mono" for="website_url">Website URL (optional)</label>
+                <input class="kt-input" type="url" id="website_url" name="website_url" value="<?= esc(old('website_url'), 'attr') ?>" placeholder="https://mykava.fj">
+            </div>
+
+            <div class="flex flex-col gap-1">
                 <label class="kt-form-label font-normal text-mono" for="password">Password</label>
                 <input class="kt-input" type="password" id="password" name="password" required minlength="8">
                 <span class="text-2sm text-secondary-foreground">At least 8 characters. This is for logging into your merchant dashboard — separate from your API secret.</span>
