@@ -4,6 +4,7 @@ namespace App\Filters;
 
 use App\Libraries\PaymentGateway\Helpers\ApiContext;
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
@@ -13,8 +14,8 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Authenticates merchant API requests.
  *
  * Expects headers:
- *   X-Api-Key:   the merchant's public API key
- *   X-Signature: hash_hmac('sha256', <raw request body>, <api secret>)
+ *   X-Api-Key:   the calling application's public API key
+ *   X-Signature: hash_hmac('sha256', <raw request body>, <application's api secret>)
  */
 class ApiAuthFilter implements FilterInterface
 {
@@ -29,22 +30,31 @@ class ApiAuthFilter implements FilterInterface
                 ->setJSON(['error' => 'Missing API credentials.']);
         }
 
-        $merchant = model(MerchantModel::class)->findByApiKey($apiKey);
+        $applicationModel = model(ApplicationModel::class);
+        $application       = $applicationModel->findByApiKey($apiKey);
 
-        if ($merchant === null) {
+        if ($application === null) {
             return service('response')
                 ->setStatusCode(401)
                 ->setJSON(['error' => 'Invalid API key.']);
         }
 
-        if (! model(MerchantModel::class)->isSubscriptionActive($merchant)) {
+        $merchant = model(MerchantModel::class)->find($application['merchant_id']);
+
+        if ($merchant === null || $merchant['status'] !== 'active') {
+            return service('response')
+                ->setStatusCode(403)
+                ->setJSON(['error' => 'Merchant account is not active.']);
+        }
+
+        if (! $applicationModel->isSubscriptionActive($application)) {
             return service('response')
                 ->setStatusCode(403)
                 ->setJSON(['error' => 'Subscription inactive or expired.']);
         }
 
         $rawBody   = $request->getBody() ?? '';
-        $apiSecret = SecurityHelper::decryptSecret($merchant['api_secret_encrypted']);
+        $apiSecret = SecurityHelper::decryptSecret($application['api_secret_encrypted']);
 
         if (! SecurityHelper::verify($rawBody, $apiSecret, $signature)) {
             return service('response')
@@ -52,7 +62,7 @@ class ApiAuthFilter implements FilterInterface
                 ->setJSON(['error' => 'Invalid request signature.']);
         }
 
-        ApiContext::setMerchant($merchant);
+        ApiContext::setContext($application, $merchant);
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
