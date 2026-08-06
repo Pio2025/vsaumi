@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
+use App\Models\MerchantPayoutAccountModel;
 use App\Models\SubscriptionModel;
 
 class ApplicationController extends BaseController
@@ -105,6 +106,10 @@ class ApplicationController extends BaseController
 
         if ($merchant['status'] === 'pending') {
             return redirect()->to('/dashboard/applications')->with('error', 'Your business must be approved by an admin before you can subscribe.');
+        }
+
+        if ($merchant['status'] !== 'active' && ! model(MerchantPayoutAccountModel::class)->hasPayoutInfo($merchant['id'])) {
+            return redirect()->to('/dashboard/settings')->with('error', 'Add your payout details before you can activate your account.');
         }
 
         $plan = $this->request->getPost('plan');

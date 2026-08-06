@@ -7,6 +7,7 @@ use App\Libraries\PaymentGateway\Services\PayoutService;
 use App\Libraries\PaymentGateway\Services\SettlementService;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
+use App\Models\MerchantPayoutAccountModel;
 use App\Models\PayoutModel;
 use App\Models\SubscriptionModel;
 use App\Models\TransactionModel;
@@ -111,6 +112,7 @@ class Dashboard extends BaseController
             'merchant'           => $merchant,
             'applications'       => $applications,
             'otherSubscriptions' => $otherSubscriptions,
+            'payoutAccount'      => model(MerchantPayoutAccountModel::class)->forMerchant($id),
         ]);
     }
 
@@ -174,11 +176,17 @@ class Dashboard extends BaseController
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 
+        $newStatus = $this->request->getPost('status');
+
+        if ($newStatus === 'active' && $merchant['status'] !== 'active' && ! model(MerchantPayoutAccountModel::class)->hasPayoutInfo($id)) {
+            return redirect()->back()->withInput()->with('error', 'This merchant has not provided payout details yet — cannot activate.');
+        }
+
         $merchants->update($id, [
             'business_name' => $this->request->getPost('business_name'),
             'contact_email' => $this->request->getPost('contact_email'),
             'contact_phone' => $this->request->getPost('contact_phone') ?: null,
-            'status'        => $this->request->getPost('status'),
+            'status'        => $newStatus,
         ]);
 
         return redirect()->to('admin/merchants')->with('success', 'Merchant updated.');
