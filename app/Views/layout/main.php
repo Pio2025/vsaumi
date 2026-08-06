@@ -20,6 +20,7 @@ if ($isAdmin) {
         ['label' => 'Transactions', 'icon' => 'bill', 'url' => 'dashboard/transactions', 'match' => 'dashboard/transactions'],
         ['label' => 'Payouts', 'icon' => 'wallet', 'url' => 'dashboard/payouts', 'match' => 'dashboard/payouts'],
         ['label' => 'Subscriptions', 'icon' => 'crown', 'url' => 'dashboard/subscriptions', 'match' => 'dashboard/subscriptions'],
+        ['label' => 'Settings', 'icon' => 'setting-2', 'url' => 'dashboard/settings', 'match' => 'dashboard/settings'],
     ];
     $displayName = session()->get('merchant_name') ?? 'Merchant';
     $roleLabel   = 'Merchant';

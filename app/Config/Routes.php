@@ -22,6 +22,8 @@ $routes->group('dashboard', ['filter' => 'merchantAuth'], static function (Route
     $routes->get('transactions', 'Dashboard::transactions');
     $routes->get('payouts', 'Dashboard::payouts');
     $routes->get('subscriptions', 'Dashboard::subscriptions');
+    $routes->get('settings', 'SettingsController::index');
+    $routes->post('settings', 'SettingsController::update');
 });
 
 // --- Demo checkout flow ---
