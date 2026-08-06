@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
+use App\Models\MerchantPayoutAccountModel;
+use App\Models\PayoutProviderModel;
 
 class Auth extends BaseController
 {
@@ -14,18 +16,26 @@ class Auth extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        return view('auth/signup', ['pageTitle' => 'Sign Up']);
+        return view('auth/signup', [
+            'pageTitle' => 'Sign Up',
+            'banks'     => model(PayoutProviderModel::class)->banks(),
+            'wallets'   => model(PayoutProviderModel::class)->digitalWallets(),
+        ]);
     }
 
     public function signup()
     {
         $rules = [
-            'business_name' => 'required|min_length[2]|max_length[150]|is_unique[merchants.business_name]',
-            'contact_email' => 'required|valid_email|is_unique[merchants.contact_email]',
-            'contact_phone' => 'permit_empty|max_length[30]|is_unique[merchants.contact_phone]',
-            'password'      => 'required|min_length[8]',
-            'app_name'      => 'required|min_length[2]|max_length[150]',
-            'website_url'   => 'permit_empty|valid_url_strict|max_length[255]',
+            'business_name'    => 'required|min_length[2]|max_length[150]|is_unique[merchants.business_name]',
+            'contact_email'    => 'required|valid_email|is_unique[merchants.contact_email]',
+            'contact_phone'    => 'permit_empty|max_length[30]|is_unique[merchants.contact_phone]',
+            'business_address' => 'required|min_length[5]|max_length[500]',
+            'password'         => 'required|min_length[8]',
+            'app_name'         => 'required|min_length[2]|max_length[150]',
+            'website_url'      => 'permit_empty|valid_url_strict|max_length[255]',
+            'payout_provider_id' => 'required|is_natural_no_zero',
+            'account_number'     => 'required|max_length[50]',
+            'account_name'       => 'required|max_length[150]',
         ];
 
         $messages = [
@@ -38,14 +48,28 @@ class Auth extends BaseController
             'contact_phone' => [
                 'is_unique' => 'This phone number is already registered to a business. Please use a different phone number.',
             ],
+            'payout_provider_id' => [
+                'required' => 'Please choose how you want to receive your payments.',
+            ],
         ];
 
         if (! $this->validate($rules, $messages)) {
             return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
         }
 
+        $payoutProvider = model(PayoutProviderModel::class)->find((int) $this->request->getPost('payout_provider_id'));
+
+        if ($payoutProvider === null) {
+            return redirect()->back()->withInput()->with('error', 'Please choose a valid payout method.');
+        }
+
+        if ($payoutProvider['type'] === 'bank' && ! in_array($this->request->getPost('account_type'), ['savings', 'checking'], true)) {
+            return redirect()->back()->withInput()->with('error', 'Please choose an account type for your bank account.');
+        }
+
         $merchants    = model(MerchantModel::class);
         $applications = model(ApplicationModel::class);
+        $payoutAccounts = model(MerchantPayoutAccountModel::class);
         $plainSecret  = SecurityHelper::generateSecret();
         $apiKey       = SecurityHelper::generateApiKey();
 
@@ -53,12 +77,21 @@ class Auth extends BaseController
         $db->transStart();
 
         $merchantId = $merchants->insert([
-            'business_name' => $this->request->getPost('business_name'),
-            'contact_email' => $this->request->getPost('contact_email'),
-            'contact_phone' => $this->request->getPost('contact_phone') ?: null,
-            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'status'        => 'pending',
+            'business_name'    => $this->request->getPost('business_name'),
+            'contact_email'    => $this->request->getPost('contact_email'),
+            'contact_phone'    => $this->request->getPost('contact_phone') ?: null,
+            'business_address' => $this->request->getPost('business_address'),
+            'password_hash'    => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'status'           => 'pending',
         ], true);
+
+        $payoutAccounts->insert([
+            'merchant_id'        => $merchantId,
+            'payout_provider_id' => $payoutProvider['id'],
+            'account_number'     => $this->request->getPost('account_number'),
+            'account_name'       => $this->request->getPost('account_name'),
+            'account_type'       => $payoutProvider['type'] === 'bank' ? $this->request->getPost('account_type') : null,
+        ]);
 
         $applicationId = $applications->insert([
             'merchant_id'           => $merchantId,
