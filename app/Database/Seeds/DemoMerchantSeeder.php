@@ -24,16 +24,31 @@ class DemoMerchantSeeder extends Seeder
         }
 
         $this->db->table('merchants')->insert([
-            'business_name' => 'Vinaka Store',
-            'contact_email' => 'demo@vsaumi.fj',
-            'contact_phone' => '9791234567',
-            'password_hash' => password_hash('demo1234', PASSWORD_DEFAULT),
-            'status'        => 'active',
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
+            'business_name'    => 'Vinaka Store',
+            'contact_email'    => 'demo@vsaumi.fj',
+            'contact_phone'    => '9791234567',
+            'business_address' => '15 Renwick Road, Suva, Fiji',
+            'password_hash'    => password_hash('demo1234', PASSWORD_DEFAULT),
+            'status'           => 'active',
+            'created_at'       => date('Y-m-d H:i:s'),
+            'updated_at'       => date('Y-m-d H:i:s'),
         ]);
 
         $merchantId = $this->db->insertID();
+
+        $bank = $this->db->table('payout_providers')->where('type', 'bank')->orderBy('id', 'ASC')->get()->getFirstRow('array');
+
+        if ($bank) {
+            $this->db->table('merchant_payout_accounts')->insert([
+                'merchant_id'        => $merchantId,
+                'payout_provider_id' => $bank['id'],
+                'account_number'     => '9988776655',
+                'account_name'       => 'Vinaka Store',
+                'account_type'       => 'savings',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s'),
+            ]);
+        }
 
         $applications = [
             ['name' => 'Vinaka Store — Online', 'website_url' => 'https://vinaka.fj', 'plan' => 'starter', 'amount' => 29],

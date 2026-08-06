@@ -25,6 +25,38 @@
                 <span class="text-xs text-secondary-foreground">Signed up</span>
                 <span class="text-2sm text-mono"><?= esc($merchant['created_at']) ?></span>
             </div>
+            <div class="flex flex-col gap-0.5 sm:col-span-3">
+                <span class="text-xs text-secondary-foreground">Business address</span>
+                <span class="text-2sm text-mono"><?= ! empty($merchant['business_address']) ? esc($merchant['business_address']) : '—' ?></span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+                <span class="text-xs text-secondary-foreground">Payout method</span>
+                <?php if ($payoutAccount): ?>
+                    <span class="text-2sm text-mono"><?= esc($payoutAccount['provider_name']) ?></span>
+                <?php else: ?>
+                    <span class="text-2sm text-destructive">Not provided</span>
+                <?php endif; ?>
+            </div>
+            <?php if ($payoutAccount): ?>
+                <?php if ($payoutAccount['provider_type'] === 'bank'): ?>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-xs text-secondary-foreground">BSB code</span>
+                        <span class="text-2sm text-mono"><?= esc($payoutAccount['provider_bsb_code']) ?></span>
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-xs text-secondary-foreground">Account type</span>
+                        <span class="text-2sm text-mono"><?= esc(ucfirst($payoutAccount['account_type'])) ?></span>
+                    </div>
+                <?php endif; ?>
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-xs text-secondary-foreground"><?= $payoutAccount['provider_type'] === 'bank' ? 'Account number' : 'Mobile / wallet number' ?></span>
+                    <span class="text-2sm text-mono"><?= esc($payoutAccount['account_number']) ?></span>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-xs text-secondary-foreground">Account name</span>
+                    <span class="text-2sm text-mono"><?= esc($payoutAccount['account_name']) ?></span>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
