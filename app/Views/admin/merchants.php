@@ -32,6 +32,12 @@
                                 </th>
                                 <th>
                                     <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Phone</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="kt-table-col">
                                         <span class="kt-table-col-label">Status</span>
                                         <span class="kt-table-col-sort"></span>
                                     </span>
@@ -60,6 +66,7 @@
                                             <span class="text-xs text-secondary-foreground font-normal"><?= esc($merchant['contact_email']) ?></span>
                                         </div>
                                     </td>
+                                    <td><span class="text-2sm"><?= $merchant['contact_phone'] ? esc($merchant['contact_phone']) : '—' ?></span></td>
                                     <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($merchant['status']) ?>"><?= esc(ucfirst($merchant['status'])) ?></span></td>
                                     <td><?= esc(ucfirst($latestPlans[$merchant['id']] ?? '—')) ?></td>
                                     <td><?= esc($merchant['created_at']) ?></td>
@@ -71,6 +78,13 @@
                                                         <i class="ki-filled ki-dots-vertical text-lg"></i>
                                                     </button>
                                                     <div class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]" data-kt-menu-dismiss="true">
+                                                        <div class="kt-menu-item">
+                                                            <a class="kt-menu-link" href="<?= site_url('admin/merchants/' . $merchant['id']) ?>">
+                                                                <span class="kt-menu-icon"><i class="ki-filled ki-eye"></i></span>
+                                                                <span class="kt-menu-title">View</span>
+                                                            </a>
+                                                        </div>
+                                                        <div class="kt-menu-separator"></div>
                                                         <?php if ($merchant['status'] === 'pending'): ?>
                                                             <div class="kt-menu-item">
                                                                 <form method="post" action="<?= site_url('admin/merchants/' . $merchant['id'] . '/approve') ?>" class="w-full">

@@ -42,6 +42,7 @@ $routes->get('admin/logout', 'Admin\Auth::logout');
 $routes->group('admin', ['filter' => 'adminAuth'], static function (RouteCollection $routes) {
     $routes->get('/', 'Admin\Dashboard::index');
     $routes->get('merchants', 'Admin\Dashboard::merchants');
+    $routes->get('merchants/(:num)', 'Admin\Dashboard::viewMerchant/$1');
     $routes->post('merchants/(:num)/approve', 'Admin\Dashboard::approveMerchant/$1');
     $routes->get('merchants/(:num)/edit', 'Admin\Dashboard::editMerchantForm/$1');
     $routes->post('merchants/(:num)/update', 'Admin\Dashboard::updateMerchant/$1');

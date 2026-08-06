@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Libraries\PaymentGateway\Services\PayoutService;
 use App\Libraries\PaymentGateway\Services\SettlementService;
+use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
 use App\Models\PayoutModel;
 use App\Models\SubscriptionModel;
@@ -78,6 +79,38 @@ class Dashboard extends BaseController
             'pageTitle'   => 'Merchants',
             'merchants'   => $merchants,
             'latestPlans' => $latestPlans,
+        ]);
+    }
+
+    public function viewMerchant(int $id)
+    {
+        $merchant = model(MerchantModel::class)->find($id);
+
+        if ($merchant === null) {
+            return redirect()->to('admin/merchants')->with('error', 'Merchant not found.');
+        }
+
+        $applicationModel  = model(ApplicationModel::class);
+        $subscriptionModel = model(SubscriptionModel::class);
+
+        $applications = $applicationModel->allForMerchant($id);
+
+        foreach ($applications as &$application) {
+            $application['latest_subscription']     = $subscriptionModel->latestForApplication($application['id']);
+            $application['has_active_subscription']  = $applicationModel->isSubscriptionActive($application);
+        }
+        unset($application);
+
+        $otherSubscriptions = array_values(array_filter(
+            $subscriptionModel->allForMerchant($id),
+            static fn (array $sub): bool => $sub['status'] !== 'active' || strtotime($sub['expires_at']) <= time()
+        ));
+
+        return view('admin/merchant_view', [
+            'pageTitle'          => $merchant['business_name'],
+            'merchant'           => $merchant,
+            'applications'       => $applications,
+            'otherSubscriptions' => $otherSubscriptions,
         ]);
     }
 
