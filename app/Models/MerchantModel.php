@@ -16,11 +16,9 @@ class MerchantModel extends Model
         'business_name',
         'contact_email',
         'contact_phone',
+        'business_address',
         'password_hash',
         'status',
-        'bank_account_details',
-        'mpaisa_wallet_id',
-        'mycash_wallet_id',
     ];
 
     public function findByEmail(string $email): ?array
