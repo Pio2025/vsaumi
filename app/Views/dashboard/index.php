@@ -58,13 +58,26 @@
     <div class="kt-card mt-5 lg:mt-7.5">
         <div class="kt-card-content p-6">
             <div class="flex items-center justify-between mb-2">
-                <h3 class="text-base font-medium text-mono">Subscription</h3>
+                <h3 class="text-base font-medium text-mono">Subscriptions</h3>
                 <a href="<?= site_url('dashboard/subscriptions') ?>" class="kt-btn kt-btn-sm kt-btn-outline">View history</a>
             </div>
-            <p class="text-2sm text-secondary-foreground mb-0">
-                Plan: <strong class="text-foreground"><?= esc(ucfirst($subscription['plan'] ?? '—')) ?></strong>
-                · Renews/expires: <strong class="text-foreground"><?= esc($subscription['expires_at'] ?? '—') ?></strong>
-            </p>
+            <?php if (empty($subscriptions)): ?>
+                <p class="text-2sm text-secondary-foreground mb-0">No subscriptions yet.</p>
+            <?php else: ?>
+                <div class="flex flex-col gap-2.5">
+                    <?php foreach ($subscriptions as $sub): ?>
+                        <div class="flex items-center justify-between border border-border rounded-lg px-3.5 py-2.5">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-sm font-medium text-mono"><?= esc($sub['application_name'] ?? '—') ?></span>
+                                <span class="text-xs text-secondary-foreground">
+                                    Plan: <?= esc(ucfirst($sub['plan'])) ?> · Renews/expires: <?= esc($sub['expires_at']) ?>
+                                </span>
+                            </div>
+                            <span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($sub['status']) ?>"><?= esc(ucfirst($sub['status'])) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 

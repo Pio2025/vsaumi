@@ -31,7 +31,7 @@ class Dashboard extends BaseController
             'pageTitle'    => 'Dashboard',
             'merchant'     => $merchant,
             'stats'        => $stats,
-            'subscription' => model(SubscriptionModel::class)->latestForMerchant($merchant['id']),
+            'subscriptions' => model(SubscriptionModel::class)->allForMerchant($merchant['id']),
             'applications' => model(ApplicationModel::class)->allForMerchant($merchant['id']),
             'newApplicationCredentials' => session()->getFlashdata('new_application_credentials'),
         ]);
