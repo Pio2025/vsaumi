@@ -125,7 +125,7 @@
                             <i class="ki-filled ki-cross"></i>
                         </button>
                     </div>
-                    <form method="post" action="<?= site_url('dashboard/applications/' . $app['id'] . '/subscribe') ?>">
+                    <form method="post" action="<?= site_url('dashboard/applications/' . $app['id'] . '/subscribe') ?>" onsubmit="KTModal.getInstance(this.closest('.kt-modal')).hide()">
                         <?= csrf_field() ?>
                         <div class="kt-modal-body flex flex-col gap-3.5">
                             <p class="text-2sm text-secondary-foreground mb-0">This charges nothing real — it's a simulated payment that activates this application's API access for 30 days.</p>
