@@ -6,7 +6,8 @@ $uriPath    = trim(service('request')->getUri()->getPath(), '/');
 if ($isAdmin) {
     $navItems = [
         ['label' => 'Dashboard', 'icon' => 'element-11', 'url' => 'admin', 'match' => 'admin'],
-        ['label' => 'Merchants', 'icon' => 'people', 'url' => 'admin/merchants', 'match' => 'admin/merchants'],
+        ['label' => 'Merchant', 'icon' => 'people', 'url' => 'admin/merchants', 'match' => 'admin/merchants'],
+        ['label' => 'Application', 'icon' => 'code', 'url' => 'admin/applications', 'match' => 'admin/applications'],
         ['label' => 'Payouts', 'icon' => 'wallet', 'url' => 'admin/payouts', 'match' => 'admin/payouts'],
     ];
     $displayName = session()->get('admin_name') ?? 'Admin';
@@ -200,6 +201,28 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
             confirmButtonColor: '#be1e2d',
             cancelButtonColor: '#6b5f5e',
             cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('submit', 'form.js-cancel-form', function (e) {
+        e.preventDefault();
+        const form = this;
+        const itemName = $(form).data('confirm-name') || 'this application';
+
+        Swal.fire({
+            title: 'Cancel subscription?',
+            text: `This will cancel the active subscription for ${itemName} and put its API access on hold immediately.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel subscription',
+            confirmButtonColor: '#be1e2d',
+            cancelButtonColor: '#6b5f5e',
+            cancelButtonText: 'Back',
             reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {

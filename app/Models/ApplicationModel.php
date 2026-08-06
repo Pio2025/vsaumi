@@ -36,6 +36,15 @@ class ApplicationModel extends Model
         return $this->where('merchant_id', $merchantId)->where('id', $id)->first();
     }
 
+    public function allWithMerchant(): array
+    {
+        return $this->select('applications.*, merchants.business_name as merchant_name')
+            ->join('merchants', 'merchants.id = applications.merchant_id')
+            ->orderBy('merchants.business_name', 'ASC')
+            ->orderBy('applications.name', 'ASC')
+            ->findAll();
+    }
+
     public function isSubscriptionActive(array $application): bool
     {
         if ($application['status'] !== 'active') {

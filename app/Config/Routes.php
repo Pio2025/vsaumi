@@ -47,6 +47,11 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function (RouteCollect
     $routes->get('merchants/(:num)/edit', 'Admin\Dashboard::editMerchantForm/$1');
     $routes->post('merchants/(:num)/update', 'Admin\Dashboard::updateMerchant/$1');
     $routes->post('merchants/(:num)/delete', 'Admin\Dashboard::deleteMerchant/$1');
+    $routes->get('applications', 'Admin\ApplicationController::index');
+    $routes->get('applications/(:num)', 'Admin\ApplicationController::view/$1');
+    $routes->get('applications/(:num)/edit', 'Admin\ApplicationController::editForm/$1');
+    $routes->post('applications/(:num)/update', 'Admin\ApplicationController::update/$1');
+    $routes->post('applications/(:num)/cancel', 'Admin\ApplicationController::cancelSubscription/$1');
     $routes->post('settlement/run', 'Admin\Dashboard::runSettlement');
     $routes->get('payouts', 'Admin\Dashboard::payouts');
     $routes->post('payouts/run', 'Admin\Dashboard::runPayouts');
