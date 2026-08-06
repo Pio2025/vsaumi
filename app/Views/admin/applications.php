@@ -77,7 +77,7 @@
                                                     <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" type="button">
                                                         <i class="ki-filled ki-dots-vertical text-lg"></i>
                                                     </button>
-                                                    <div class="kt-menu-dropdown kt-menu-default w-full max-w-[190px]" data-kt-menu-dismiss="true">
+                                                    <div class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]" data-kt-menu-dismiss="true">
                                                         <div class="kt-menu-item">
                                                             <a class="kt-menu-link" href="<?= site_url('admin/applications/' . $app['id']) ?>">
                                                                 <span class="kt-menu-icon"><i class="ki-filled ki-eye"></i></span>
