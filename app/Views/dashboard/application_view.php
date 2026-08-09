@@ -52,6 +52,7 @@
                             <th>Status</th>
                             <th>Started</th>
                             <th>Expires</th>
+                            <th>Invoice</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,6 +63,11 @@
                                 <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($sub['status']) ?>"><?= esc(ucfirst($sub['status'])) ?></span></td>
                                 <td><span class="text-2sm"><?= esc($sub['started_at']) ?></span></td>
                                 <td><span class="text-2sm"><?= esc($sub['expires_at']) ?></span></td>
+                                <td>
+                                    <a href="<?= site_url('dashboard/applications/' . $application['id'] . '/subscriptions/' . $sub['id'] . '/invoice') ?>" class="kt-btn kt-btn-sm kt-btn-outline">
+                                        <i class="ki-filled ki-file-down"></i> PDF
+                                    </a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

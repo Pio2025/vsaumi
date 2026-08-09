@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\InvoicePdfGenerator;
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
@@ -113,6 +114,33 @@ class ApplicationController extends BaseController
             'hasActive'     => $applicationModel->isSubscriptionActive($application),
             'plans'         => $this->plans,
         ]);
+    }
+
+    public function invoice(int $applicationId, int $subscriptionId)
+    {
+        $merchant         = $this->currentMerchant();
+        $applicationModel = model(ApplicationModel::class);
+        $application      = $applicationModel->findForMerchant($merchant['id'], $applicationId);
+
+        if ($application === null) {
+            return redirect()->to('/dashboard/applications')->with('error', 'Application not found.');
+        }
+
+        $subscription = model(SubscriptionModel::class)
+            ->where('application_id', $applicationId)
+            ->find($subscriptionId);
+
+        if ($subscription === null) {
+            return redirect()->to('/dashboard/applications/' . $applicationId)->with('error', 'Invoice not found.');
+        }
+
+        $pdf      = InvoicePdfGenerator::generate($merchant, $application, $subscription);
+        $filename = 'INV-' . str_pad((string) $subscription['id'], 6, '0', STR_PAD_LEFT) . '.pdf';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($pdf);
     }
 
     public function subscribe(int $applicationId)

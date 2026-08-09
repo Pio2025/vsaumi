@@ -20,6 +20,7 @@ $routes->group('dashboard', ['filter' => 'merchantAuth'], static function (Route
     $routes->post('applications/new', 'ApplicationController::create');
     $routes->get('applications/(:num)', 'ApplicationController::view/$1');
     $routes->post('applications/(:num)/subscribe', 'ApplicationController::subscribe/$1');
+    $routes->get('applications/(:num)/subscriptions/(:num)/invoice', 'ApplicationController::invoice/$1/$2');
     $routes->get('transactions', 'Dashboard::transactions');
     $routes->get('payouts', 'Dashboard::payouts');
     $routes->get('subscriptions', 'Dashboard::subscriptions');
