@@ -94,6 +94,27 @@ class ApplicationController extends BaseController
         return redirect()->to('/dashboard/applications')->with('success', "Application \"{$name}\" created.");
     }
 
+    public function view(int $applicationId)
+    {
+        $merchant         = $this->currentMerchant();
+        $applicationModel = model(ApplicationModel::class);
+        $application      = $applicationModel->findForMerchant($merchant['id'], $applicationId);
+
+        if ($application === null) {
+            return redirect()->to('/dashboard/applications')->with('error', 'Application not found.');
+        }
+
+        $subscriptionModel = model(SubscriptionModel::class);
+
+        return view('dashboard/application_view', [
+            'pageTitle'     => $application['name'],
+            'application'   => $application,
+            'subscriptions' => $subscriptionModel->allForApplication($applicationId),
+            'hasActive'     => $applicationModel->isSubscriptionActive($application),
+            'plans'         => $this->plans,
+        ]);
+    }
+
     public function subscribe(int $applicationId)
     {
         $merchant         = $this->currentMerchant();

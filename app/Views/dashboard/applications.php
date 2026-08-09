@@ -62,7 +62,7 @@
                                         <span class="kt-table-col-sort"></span>
                                     </span>
                                 </th>
-                                <th class="w-[140px]" data-kt-datatable-column-sort="false">Action</th>
+                                <th class="w-[190px]" data-kt-datatable-column-sort="false">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,14 +84,17 @@
                                             <span class="text-2sm text-secondary-foreground">No active subscription</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="w-[140px]">
-                                        <?php if ($app['has_active_subscription']): ?>
-                                            <span class="text-2sm text-secondary-foreground">—</span>
-                                        <?php else: ?>
-                                            <button type="button" class="kt-btn kt-btn-sm kt-btn-outline" data-kt-modal-toggle="#subscribe_modal_<?= esc($app['id'], 'attr') ?>">
-                                                Subscribe
-                                            </button>
-                                        <?php endif; ?>
+                                    <td class="w-[190px]">
+                                        <div class="flex items-center gap-1.5">
+                                            <a href="<?= site_url('dashboard/applications/' . $app['id']) ?>" class="kt-btn kt-btn-sm kt-btn-outline">
+                                                View
+                                            </a>
+                                            <?php if (! $app['has_active_subscription']): ?>
+                                                <button type="button" class="kt-btn kt-btn-sm kt-btn-outline" data-kt-modal-toggle="#subscribe_modal_<?= esc($app['id'], 'attr') ?>">
+                                                    Subscribe
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

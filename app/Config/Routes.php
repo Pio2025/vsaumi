@@ -18,6 +18,7 @@ $routes->group('dashboard', ['filter' => 'merchantAuth'], static function (Route
     $routes->get('applications', 'ApplicationController::index');
     $routes->get('applications/new', 'ApplicationController::newForm');
     $routes->post('applications/new', 'ApplicationController::create');
+    $routes->get('applications/(:num)', 'ApplicationController::view/$1');
     $routes->post('applications/(:num)/subscribe', 'ApplicationController::subscribe/$1');
     $routes->get('transactions', 'Dashboard::transactions');
     $routes->get('payouts', 'Dashboard::payouts');
