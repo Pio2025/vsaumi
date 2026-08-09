@@ -54,6 +54,7 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function (RouteCollect
     $routes->get('applications/(:num)/edit', 'Admin\ApplicationController::editForm/$1');
     $routes->post('applications/(:num)/update', 'Admin\ApplicationController::update/$1');
     $routes->post('applications/(:num)/cancel', 'Admin\ApplicationController::cancelSubscription/$1');
+    $routes->post('applications/(:num)/activate', 'Admin\ApplicationController::activatePlan/$1');
     $routes->post('settlement/run', 'Admin\Dashboard::runSettlement');
     $routes->get('payouts', 'Admin\Dashboard::payouts');
     $routes->post('payouts/run', 'Admin\Dashboard::runPayouts');

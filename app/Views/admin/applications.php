@@ -102,6 +102,14 @@
                                                                     </button>
                                                                 </form>
                                                             </div>
+                                                        <?php else: ?>
+                                                            <div class="kt-menu-separator"></div>
+                                                            <div class="kt-menu-item">
+                                                                <button type="button" class="kt-menu-link w-full text-left" data-kt-modal-toggle="#activate_plan_modal_<?= esc($app['id'], 'attr') ?>">
+                                                                    <span class="kt-menu-icon"><i class="ki-filled ki-check-circle"></i></span>
+                                                                    <span class="kt-menu-title">Activate plan</span>
+                                                                </button>
+                                                            </div>
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
@@ -128,5 +136,39 @@
         </div>
     <?php endif; ?>
 </div>
+
+<?php foreach ($applications as $app): ?>
+    <?php if (! $app['has_active_subscription']): ?>
+        <div class="kt-modal" data-kt-modal="true" id="activate_plan_modal_<?= esc($app['id'], 'attr') ?>">
+            <div class="kt-modal-dialog kt-modal-open:!flex">
+                <div class="kt-modal-content max-w-[480px]">
+                    <div class="kt-modal-header">
+                        <h3 class="kt-modal-title">Activate plan for "<?= esc($app['name']) ?>"</h3>
+                        <button class="kt-modal-close" data-kt-modal-dismiss="true" type="button">
+                            <i class="ki-filled ki-cross"></i>
+                        </button>
+                    </div>
+                    <form method="post" action="<?= site_url('admin/applications/' . $app['id'] . '/activate') ?>" onsubmit="KTModal.getInstance(this.closest('.kt-modal')).hide()">
+                        <?= csrf_field() ?>
+                        <div class="kt-modal-body flex flex-col gap-3.5">
+                            <p class="text-2sm text-secondary-foreground mb-0">This activates the application's API access directly, without the merchant going through the subscribe flow. If the merchant isn't active yet, this also requires payout details to already be on file.</p>
+                            <?php foreach ($plans as $key => $plan): ?>
+                                <label class="kt-card cursor-pointer has-[:checked]:border-primary p-4">
+                                    <input type="radio" name="plan" value="<?= esc($key) ?>" class="kt-radio mb-2" <?= $key === 'starter' ? 'checked' : '' ?>>
+                                    <div class="font-medium text-mono"><?= esc($plan['label']) ?> — $<?= esc($plan['price']) ?>/mo</div>
+                                    <div class="text-xs text-secondary-foreground"><?= esc($plan['note']) ?></div>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="kt-modal-footer">
+                            <button type="button" class="kt-btn kt-btn-outline" data-kt-modal-dismiss="true">Cancel</button>
+                            <button type="submit" class="kt-btn kt-btn-mono">Activate plan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>
 
 <?= $this->endSection() ?>

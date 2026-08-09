@@ -36,6 +36,14 @@
                     </select>
                 </div>
 
+                <label class="kt-form-label flex items-start gap-2 font-normal text-mono">
+                    <input class="kt-checkbox mt-0.5" type="checkbox" id="regenerate_api_key" name="regenerate_api_key" value="1">
+                    <span>
+                        Regenerate API key
+                        <span class="block text-xs text-secondary-foreground font-normal">The current key/secret will stop working immediately and be replaced with a new pair, shown once after saving.</span>
+                    </span>
+                </label>
+
                 <button type="submit" class="kt-btn kt-btn-primary justify-center">Save changes</button>
             </form>
         </div>

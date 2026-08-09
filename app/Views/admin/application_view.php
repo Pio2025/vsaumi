@@ -6,11 +6,26 @@
         <?= csrf_field() ?>
         <button type="submit" class="kt-btn kt-btn-outline kt-btn-destructive">Cancel subscription</button>
     </form>
+<?php else: ?>
+    <button type="button" class="kt-btn kt-btn-primary" data-kt-modal-toggle="#activate_plan_modal">Activate plan</button>
 <?php endif; ?>
 <a href="<?= site_url('admin/applications') ?>" class="kt-btn kt-btn-outline">Back to applications</a>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+
+<?php if ($regeneratedCredentials): ?>
+    <div class="kt-card border-primary mb-5 lg:mb-7.5">
+        <div class="kt-card-content p-6">
+            <h3 class="text-base font-medium text-mono mb-1.5">New API credentials for "<?= esc($application['name']) ?>"</h3>
+            <p class="text-2sm text-secondary-foreground mb-3">Save the API secret now — it will not be shown again. The old key/secret no longer work.</p>
+            <div class="credential-box">
+                <div class="row"><span class="text-2sm text-secondary-foreground">API Key</span><span class="mono"><?= esc($regeneratedCredentials['api_key']) ?></span></div>
+                <div class="row"><span class="text-2sm text-secondary-foreground">API Secret</span><span class="mono"><?= esc($regeneratedCredentials['api_secret']) ?></span></div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
 <div class="kt-card mb-5 lg:mb-7.5">
     <div class="kt-card-content p-6">
@@ -84,5 +99,37 @@
         </div>
     <?php endif; ?>
 </div>
+
+<?php if (! $hasActive): ?>
+    <div class="kt-modal" data-kt-modal="true" id="activate_plan_modal">
+        <div class="kt-modal-dialog kt-modal-open:!flex">
+            <div class="kt-modal-content max-w-[480px]">
+                <div class="kt-modal-header">
+                    <h3 class="kt-modal-title">Activate plan for "<?= esc($application['name']) ?>"</h3>
+                    <button class="kt-modal-close" data-kt-modal-dismiss="true" type="button">
+                        <i class="ki-filled ki-cross"></i>
+                    </button>
+                </div>
+                <form method="post" action="<?= site_url('admin/applications/' . $application['id'] . '/activate') ?>" onsubmit="KTModal.getInstance(this.closest('.kt-modal')).hide()">
+                    <?= csrf_field() ?>
+                    <div class="kt-modal-body flex flex-col gap-3.5">
+                        <p class="text-2sm text-secondary-foreground mb-0">This activates the application's API access directly, without the merchant going through the subscribe flow. If the merchant isn't active yet, this also requires payout details to already be on file.</p>
+                        <?php foreach ($plans as $key => $plan): ?>
+                            <label class="kt-card cursor-pointer has-[:checked]:border-primary p-4">
+                                <input type="radio" name="plan" value="<?= esc($key) ?>" class="kt-radio mb-2" <?= $key === 'starter' ? 'checked' : '' ?>>
+                                <div class="font-medium text-mono"><?= esc($plan['label']) ?> — $<?= esc($plan['price']) ?>/mo</div>
+                                <div class="text-xs text-secondary-foreground"><?= esc($plan['note']) ?></div>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="kt-modal-footer">
+                        <button type="button" class="kt-btn kt-btn-outline" data-kt-modal-dismiss="true">Cancel</button>
+                        <button type="submit" class="kt-btn kt-btn-mono">Activate plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
 <?= $this->endSection() ?>
