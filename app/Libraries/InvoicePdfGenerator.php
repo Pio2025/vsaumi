@@ -25,11 +25,20 @@ class InvoicePdfGenerator
         $statusLabel = ucfirst($subscription['status']);
         $amount      = number_format((float) $subscription['amount'], 2);
 
+        $logoPath = FCPATH . 'assets/logo/logo_small.png';
+        $logoCell = '<span style="color:#666;">Payment Gateway Services</span>';
+
+        if (is_file($logoPath)) {
+            $pdf->Image($logoPath, 18, 15, 32, 0, 'PNG', '', 'T', false, 300);
+            $logoCell = '<div style="height:22px;"></div>' . $logoCell;
+        } else {
+            $logoCell = '<h1 style="font-size:20px;margin:0;">VSaumi</h1>' . $logoCell;
+        }
+
         $html = '
             <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="50%"><h1 style="font-size:20px;margin:0;">VSaumi</h1>
-                        <span style="color:#666;">Payment Gateway Services</span></td>
+                    <td width="50%">' . $logoCell . '</td>
                     <td width="50%" style="text-align:right;">
                         <h2 style="font-size:16px;margin:0;">INVOICE</h2>
                         <span style="color:#666;">' . esc($invoiceNumber) . '</span></td>

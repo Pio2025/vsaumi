@@ -60,6 +60,11 @@
                                         <span class="kt-table-col-sort"></span>
                                     </span>
                                 </th>
+                                <th>
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Invoice</span>
+                                    </span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,6 +76,11 @@
                                     <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($sub['status']) ?>"><?= esc(ucfirst($sub['status'])) ?></span></td>
                                     <td><?= esc($sub['started_at']) ?></td>
                                     <td><?= esc($sub['expires_at']) ?></td>
+                                    <td>
+                                        <a href="<?= site_url('dashboard/applications/' . $sub['application_id'] . '/subscriptions/' . $sub['id'] . '/invoice') ?>" class="kt-btn kt-btn-sm kt-btn-outline">
+                                            <i class="ki-filled ki-file-down"></i> PDF
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
