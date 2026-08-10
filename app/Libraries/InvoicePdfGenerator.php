@@ -28,10 +28,17 @@ class InvoicePdfGenerator
         $logoPath   = FCPATH . 'assets/logo/logo_small.png';
         $logoWidth  = 32;
         $logoHeight = $logoWidth * (80 / 406);
-        $logoCell   = '<p style="padding-top:' . round($logoHeight + 3, 1) . 'mm;margin:0;color:#666;">Payment Gateway Services</p>';
+        $logoCell   = '&nbsp;';
 
         if (is_file($logoPath)) {
             $pdf->Image($logoPath, 18, 15, $logoWidth, $logoHeight, 'PNG', '', 'T', false, 300);
+
+            $pdf->SetXY(18, 15 + $logoHeight + 2);
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->SetTextColor(102, 102, 102);
+            $pdf->Cell(0, 4, 'Payment Gateway Services', 0, 0, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('helvetica', '', 10);
         } else {
             $logoCell = '<h1 style="font-size:20px;margin:0;">VSaumi</h1><span style="color:#666;">Payment Gateway Services</span>';
         }
