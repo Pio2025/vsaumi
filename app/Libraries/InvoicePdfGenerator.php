@@ -30,10 +30,15 @@ class InvoicePdfGenerator
         $logoHeight = $logoWidth * (80 / 406);
         $logoCell   = '&nbsp;';
 
-        if (is_file($logoPath)) {
-            $pdf->Image($logoPath, 18, 15, $logoWidth, $logoHeight, 'PNG', '', 'T', false, 300);
+        // TCPDF's HTML table cells render text ~4mm right of the page margin
+        // even with cellpadding="0", so the logo is nudged to match rather
+        // than the left margin, keeping it flush with "Billed to"/"Description".
+        $contentX = 22;
 
-            $pdf->SetXY(18, 15 + $logoHeight + 2);
+        if (is_file($logoPath)) {
+            $pdf->Image($logoPath, $contentX, 15, $logoWidth, $logoHeight, 'PNG', '', 'T', false, 300);
+
+            $pdf->SetXY($contentX, 15 + $logoHeight + 2);
             $pdf->SetFont('helvetica', '', 9);
             $pdf->SetTextColor(102, 102, 102);
             $pdf->Cell(0, 4, 'Payment Gateway Services', 0, 0, 'L');
