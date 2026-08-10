@@ -39,6 +39,7 @@ class InvoicePdfGenerator
             $pdf->Cell(0, 4, 'Payment Gateway Services', 0, 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetFont('helvetica', '', 10);
+            $pdf->SetXY(18, 18);
         } else {
             $logoCell = '<h1 style="font-size:20px;margin:0;">VSaumi</h1><span style="color:#666;">Payment Gateway Services</span>';
         }
