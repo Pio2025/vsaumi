@@ -54,6 +54,17 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
     <link rel="stylesheet" href="<?= base_url('assets/metronic/vendors/keenicons/styles.bundle.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/metronic/css/styles.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
+    <style>
+        .kt-menu-tree { position: relative; }
+        .kt-menu-tree::before { content: ""; position: absolute; inset-inline-start: 19px; top: 0; bottom: 0; width: 1px; background-color: var(--border); }
+        .kt-menu-tree .kt-menu-link { padding-inline-start: 28px; position: relative; }
+        .kt-menu-tree-dot { position: absolute; inset-inline-start: 16px; top: 50%; width: 6px; height: 6px; border-radius: 9999px; background-color: var(--muted-foreground); transform: translateY(-50%); transition: background-color .15s ease; }
+        .kt-menu-tree .kt-menu-item.active .kt-menu-tree-dot,
+        .kt-menu-tree .kt-menu-link:hover .kt-menu-tree-dot { background-color: var(--primary); }
+        .kt-menu-arrow .ki-minus { display: none; }
+        .kt-menu-item.show > .kt-menu-link .kt-menu-arrow .ki-plus { display: none; }
+        .kt-menu-item.show > .kt-menu-link .kt-menu-arrow .ki-minus { display: inline-flex; }
+    </style>
 </head>
 <body class="antialiased flex h-full text-base text-foreground bg-background demo1 kt-sidebar-fixed kt-header-fixed">
 <script>
@@ -96,15 +107,16 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
                                         <?= esc($item['label']) ?>
                                     </span>
                                     <span class="kt-menu-arrow text-muted-foreground w-[20px] shrink-0 flex items-center justify-center">
-                                        <i class="ki-filled ki-down text-2xs kt-menu-item-show:hidden"></i>
-                                        <i class="ki-filled ki-up text-2xs hidden kt-menu-item-show:inline-flex"></i>
+                                        <i class="ki-filled ki-plus text-2xs"></i>
+                                        <i class="ki-filled ki-minus text-2xs"></i>
                                     </span>
                                 </a>
-                                <div class="kt-menu-accordion gap-1 ps-[10px] <?= $childActive ? 'show' : '' ?>">
+                                <div class="kt-menu-accordion kt-menu-tree gap-1 <?= $childActive ? 'show' : '' ?>">
                                     <?php foreach ($item['children'] as $child): ?>
                                         <?php $active = str_starts_with($uriPath, $child['match']); ?>
                                         <div class="kt-menu-item <?= $active ? 'active' : '' ?>">
-                                            <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] ps-[10px] pe-[10px] py-[8px]" href="<?= site_url($child['url']) ?>">
+                                            <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] pe-[10px] py-[8px]" href="<?= site_url($child['url']) ?>">
+                                                <span class="kt-menu-tree-dot"></span>
                                                 <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold">
                                                     <?= esc($child['label']) ?>
                                                 </span>
