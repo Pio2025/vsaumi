@@ -91,11 +91,29 @@ class TransactionModel extends Model
     }
 
     /**
-     * Net (fee-deducted) balance of settled transactions not yet paid out.
+     * Transactions the merchant has earned but hasn't been paid out for yet —
+     * captured (fee not assessed till settlement) or already-settled, either
+     * way not yet attached to a payout. This is what "Available balance" on
+     * the dashboard shows; it's deliberately broader than
+     * unpaidSettledForMerchant(), which only PayoutService may bundle into an
+     * actual payout, since a captured transaction's fee isn't final until it
+     * settles.
+     */
+    public function unpaidEarnedForMerchant(int $merchantId): array
+    {
+        return $this->joinedForMerchant($merchantId)
+            ->whereIn('transactions.status', ['captured', 'settled'])
+            ->where('transactions.payout_id', null)
+            ->findAll();
+    }
+
+    /**
+     * Net (fee-deducted where known) balance of earned transactions not yet
+     * paid out.
      */
     public function availableBalanceForMerchant(int $merchantId): float
     {
-        $transactions = $this->unpaidSettledForMerchant($merchantId);
+        $transactions = $this->unpaidEarnedForMerchant($merchantId);
 
         return array_sum(array_column($transactions, 'amount')) - array_sum(array_column($transactions, 'fee_amount'));
     }

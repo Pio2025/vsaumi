@@ -32,8 +32,30 @@ class SettlementService
      */
     public function runBatch(): array
     {
-        $captured = $this->transactions->where('status', 'captured')->findAll();
+        return $this->settle($this->transactions->where('status', 'captured')->findAll());
+    }
 
+    /**
+     * Settle a single merchant's captured transactions. Called when an
+     * admin approves a withdrawal request, so the request's declared
+     * balance — which includes not-yet-settled captured amounts — is
+     * trued up (fee assessed, status flipped) before PayoutService bundles
+     * it into an actual payout.
+     *
+     * @return array{settled_count: int, total_amount: float, total_fees: float}
+     */
+    public function runBatchForMerchant(int $merchantId): array
+    {
+        return $this->settle($this->transactions->joinedForMerchant($merchantId)->where('transactions.status', 'captured')->findAll());
+    }
+
+    /**
+     * @param list<array<string, mixed>> $captured
+     *
+     * @return array{settled_count: int, total_amount: float, total_fees: float}
+     */
+    protected function settle(array $captured): array
+    {
         $totalAmount = 0.0;
         $totalFees   = 0.0;
 

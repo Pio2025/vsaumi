@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Libraries\NotificationService;
 use App\Libraries\PaymentGateway\Services\PayoutService;
+use App\Libraries\PaymentGateway\Services\SettlementService;
 use App\Models\MerchantModel;
 use App\Models\WithdrawalRequestModel;
 
@@ -28,7 +29,14 @@ class WithdrawalController extends BaseController
         }
 
         $merchant = model(MerchantModel::class)->find($request['merchant_id']);
-        $result   = (new PayoutService())->processForMerchant($request['merchant_id']);
+
+        // Approving a withdrawal is what triggers settlement for this
+        // merchant — the balance they requested against includes captured-
+        // but-not-yet-settled funds, so true those up (fee assessed, status
+        // flipped) before PayoutService bundles only 'settled' transactions.
+        (new SettlementService())->runBatchForMerchant($request['merchant_id']);
+
+        $result = (new PayoutService())->processForMerchant($request['merchant_id']);
 
         if ($result === null) {
             $withdrawalModel->update($id, [

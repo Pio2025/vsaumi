@@ -95,7 +95,7 @@
                     <div class="text-2xl font-semibold text-mono mt-1">$<?= esc(number_format($availableBalance, 2)) ?> FJD</div>
                 </div>
             </div>
-            <p class="text-xs text-secondary-foreground mt-1 mb-3">Settled funds not yet paid out.</p>
+            <p class="text-xs text-secondary-foreground mt-1 mb-3">Earned funds not yet paid out.</p>
             <?php if ($pendingWithdrawal): ?>
                 <span class="kt-badge kt-badge-sm kt-badge-outline kt-badge-warning">Withdrawal of $<?= esc(number_format((float) $pendingWithdrawal['amount'], 2)) ?> pending review</span>
             <?php elseif ($availableBalance > 0): ?>
