@@ -5,6 +5,17 @@
 
 <?= $this->section('content') ?>
 
+<style>
+    .kt-stat-card { display: flex; align-items: center; gap: 0.875rem; }
+    .kt-stat-icon { width: 2.75rem; height: 2.75rem; min-width: 2.75rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    .kt-stat-icon.is-primary { background: color-mix(in oklch, var(--primary) 14%, transparent); color: var(--primary); }
+    .kt-stat-icon.is-warning { background: rgba(245, 158, 11, .14); color: #d97706; }
+    .kt-stat-icon.is-success { background: rgba(34, 197, 94, .14); color: #16a34a; }
+    .kt-stat-icon.is-destructive { background: color-mix(in oklch, var(--destructive) 14%, transparent); color: var(--destructive); }
+    .kt-stat-icon.is-violet { background: rgba(139, 92, 246, .14); color: #7c3aed; }
+    .kt-stat-icon.is-orange { background: rgba(249, 115, 22, .14); color: #ea580c; }
+</style>
+
 <?php if ($newApplicationCredentials): ?>
     <div class="kt-card border-primary mb-5 lg:mb-7.5">
         <div class="kt-card-content p-6">
@@ -38,27 +49,52 @@
 <?php else: ?>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-7.5">
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">Total transactions</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5"><?= esc($stats['total']) ?></div>
+            <div class="kt-stat-card">
+                <div class="kt-stat-icon is-primary"><i class="ki-filled ki-chart-simple"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">Total transactions</span>
+                    <div class="text-2xl font-semibold text-mono mt-1"><?= esc($stats['total']) ?></div>
+                </div>
+            </div>
         </div>
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">In progress</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5"><?= esc($stats['pending']) ?></div>
+            <div class="kt-stat-card">
+                <div class="kt-stat-icon is-warning"><i class="ki-filled ki-time"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">In progress</span>
+                    <div class="text-2xl font-semibold text-mono mt-1"><?= esc($stats['pending']) ?></div>
+                </div>
+            </div>
         </div>
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">Settled</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5"><?= esc($stats['settled']) ?></div>
+            <div class="kt-stat-card">
+                <div class="kt-stat-icon is-success"><i class="ki-filled ki-check-circle"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">Settled</span>
+                    <div class="text-2xl font-semibold text-mono mt-1"><?= esc($stats['settled']) ?></div>
+                </div>
+            </div>
         </div>
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">Failed</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5"><?= esc($stats['failed']) ?></div>
+            <div class="kt-stat-card">
+                <div class="kt-stat-icon is-destructive"><i class="ki-filled ki-cross-circle"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">Failed</span>
+                    <div class="text-2xl font-semibold text-mono mt-1"><?= esc($stats['failed']) ?></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-7.5 mt-5 lg:mt-7.5">
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">Available balance</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5">$<?= esc(number_format($availableBalance, 2)) ?> FJD</div>
+            <div class="kt-stat-card mb-3">
+                <div class="kt-stat-icon is-violet"><i class="ki-filled ki-wallet"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">Available balance</span>
+                    <div class="text-2xl font-semibold text-mono mt-1">$<?= esc(number_format($availableBalance, 2)) ?> FJD</div>
+                </div>
+            </div>
             <p class="text-xs text-secondary-foreground mt-1 mb-3">Settled funds not yet paid out.</p>
             <?php if ($pendingWithdrawal): ?>
                 <span class="kt-badge kt-badge-sm kt-badge-outline kt-badge-warning">Withdrawal of $<?= esc(number_format((float) $pendingWithdrawal['amount'], 2)) ?> pending review</span>
@@ -70,8 +106,13 @@
             <?php endif; ?>
         </div>
         <div class="kt-card p-5">
-            <span class="text-2sm text-secondary-foreground font-medium">Total revenue</span>
-            <div class="text-2xl font-semibold text-mono mt-1.5">$<?= esc(number_format($totalRevenue, 2)) ?> FJD</div>
+            <div class="kt-stat-card">
+                <div class="kt-stat-icon is-orange"><i class="ki-filled ki-chart-line-up"></i></div>
+                <div>
+                    <span class="text-2sm text-secondary-foreground font-medium">Total revenue</span>
+                    <div class="text-2xl font-semibold text-mono mt-1">$<?= esc(number_format($totalRevenue, 2)) ?> FJD</div>
+                </div>
+            </div>
             <p class="text-xs text-secondary-foreground mt-1 mb-0">Total settled while using VSaumi.</p>
         </div>
     </div>
