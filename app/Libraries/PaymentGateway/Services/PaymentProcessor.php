@@ -3,9 +3,12 @@
 namespace App\Libraries\PaymentGateway\Services;
 
 use App\Libraries\PaymentGateway\Core\Interfaces\PaymentGatewayInterface;
+use App\Models\ApplicationModel;
+use App\Models\MerchantModel;
 use App\Models\TransactionModel;
 use Config\Payment;
 use RuntimeException;
+use Throwable;
 
 class PaymentProcessor
 {
@@ -78,6 +81,10 @@ class PaymentProcessor
 
         $this->transactions->update($transaction['id'], ['status' => $outcome]);
 
+        if ($outcome === 'captured') {
+            $this->maybeSendReceipt($transaction);
+        }
+
         return $this->transactions->find($transaction['id']);
     }
 
@@ -97,9 +104,50 @@ class PaymentProcessor
 
         if ($transaction !== null) {
             $this->transactions->update($transaction['id'], ['status' => $result['status']]);
+
+            if (($result['status'] ?? null) === 'captured') {
+                $this->maybeSendReceipt($transaction);
+            }
         }
 
         return $result;
+    }
+
+    /**
+     * Emails a receipt when a transaction newly transitions into 'captured'
+     * and a customer email was collected at checkout. $transaction is the
+     * pre-update row, so its 'status' still reflects the state we're
+     * transitioning *from* — used to avoid re-sending on a duplicate
+     * confirm/webhook for an already-captured transaction.
+     */
+    protected function maybeSendReceipt(array $transaction): void
+    {
+        if ($transaction['status'] === 'captured' || empty($transaction['customer_email'])) {
+            return;
+        }
+
+        $application = model(ApplicationModel::class)->find($transaction['app_id']);
+        $merchant    = $application !== null ? model(MerchantModel::class)->find($application['merchant_id']) : null;
+
+        if ($application === null || $merchant === null) {
+            return;
+        }
+
+        $email = service('email');
+        $email->setTo($transaction['customer_email']);
+        $email->setSubject('Receipt from ' . $merchant['business_name'] . ' — ' . $transaction['reference']);
+        $email->setMailType('html');
+        $email->setMessage(view('emails/receipt', [
+            'transaction' => $transaction,
+            'application' => $application,
+            'merchant'    => $merchant,
+        ]));
+
+        try {
+            $email->send();
+        } catch (Throwable $e) {
+            log_message('error', 'Receipt email failed for ' . $transaction['reference'] . ': ' . $e->getMessage());
+        }
     }
 
     protected function resolveAdapter(string $paymentMethod): PaymentGatewayInterface
