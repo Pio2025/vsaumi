@@ -22,10 +22,10 @@ class Dashboard extends BaseController
         $txModel  = model(TransactionModel::class);
 
         $stats = [
-            'total'   => $txModel->where('merchant_id', $merchant['id'])->countAllResults(false),
-            'pending' => $txModel->where('merchant_id', $merchant['id'])->whereIn('status', ['pending', 'authorized'])->countAllResults(false),
-            'settled' => $txModel->where('merchant_id', $merchant['id'])->where('status', 'settled')->countAllResults(false),
-            'failed'  => $txModel->where('merchant_id', $merchant['id'])->where('status', 'failed')->countAllResults(),
+            'total'   => $txModel->joinedForMerchant($merchant['id'])->countAllResults(),
+            'pending' => $txModel->joinedForMerchant($merchant['id'])->whereIn('transactions.status', ['pending', 'authorized'])->countAllResults(),
+            'settled' => $txModel->joinedForMerchant($merchant['id'])->where('transactions.status', 'settled')->countAllResults(),
+            'failed'  => $txModel->joinedForMerchant($merchant['id'])->where('transactions.status', 'failed')->countAllResults(),
         ];
 
         return view('dashboard/index', [
@@ -59,14 +59,30 @@ class Dashboard extends BaseController
         $merchant = $this->currentMerchant();
 
         $transactions = model(TransactionModel::class)
-            ->where('merchant_id', $merchant['id'])
-            ->orderBy('id', 'DESC')
+            ->joinedForMerchant($merchant['id'])
+            ->orderBy('transactions.id', 'DESC')
             ->findAll();
 
         return view('dashboard/transactions', [
             'pageTitle'    => 'Transactions',
             'merchant'     => $merchant,
             'transactions' => $transactions,
+        ]);
+    }
+
+    public function transactionView(int $id)
+    {
+        $merchant    = $this->currentMerchant();
+        $transaction = model(TransactionModel::class)->findForMerchant($id, $merchant['id']);
+
+        if ($transaction === null) {
+            return redirect()->to('dashboard/transactions')->with('error', 'Transaction not found.');
+        }
+
+        return view('dashboard/transaction_view', [
+            'pageTitle'   => 'Transaction ' . $transaction['reference'],
+            'merchant'    => $merchant,
+            'transaction' => $transaction,
         ]);
     }
 

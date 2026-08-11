@@ -13,7 +13,7 @@ class TransactionModel extends Model
     protected $useTimestamps    = true;
 
     protected $allowedFields = [
-        'merchant_id',
+        'app_id',
         'reference',
         'customer_email',
         'customer_msisdn',
@@ -25,6 +25,11 @@ class TransactionModel extends Model
         'fee_amount',
         'metadata',
         'payout_id',
+        'product_name',
+        'quantity',
+        'unit_of_measure',
+        'unit_price',
+        'product_description',
     ];
 
     public function findByReference(string $reference): ?array
@@ -33,13 +38,38 @@ class TransactionModel extends Model
     }
 
     /**
+     * Transactions belong to an application; a merchant's transactions are
+     * everything from any application it owns. Every merchant-scoped query
+     * below joins through applications rather than filtering a merchant_id
+     * column directly.
+     */
+    public function joinedForMerchant(int $merchantId): self
+    {
+        return $this->select('transactions.*')
+            ->join('applications', 'applications.id = transactions.app_id')
+            ->where('applications.merchant_id', $merchantId);
+    }
+
+    /**
+     * Ownership-checked single lookup for the transaction detail view.
+     */
+    public function findForMerchant(int $id, int $merchantId): ?array
+    {
+        return $this->select('transactions.*, applications.name as application_name')
+            ->join('applications', 'applications.id = transactions.app_id')
+            ->where('transactions.id', $id)
+            ->where('applications.merchant_id', $merchantId)
+            ->first();
+    }
+
+    /**
      * Transactions that are settled but not yet attached to a payout batch.
      */
     public function unpaidSettledForMerchant(int $merchantId): array
     {
-        return $this->where('merchant_id', $merchantId)
-            ->where('status', 'settled')
-            ->where('payout_id', null)
+        return $this->joinedForMerchant($merchantId)
+            ->where('transactions.status', 'settled')
+            ->where('transactions.payout_id', null)
             ->findAll();
     }
 
@@ -50,10 +80,11 @@ class TransactionModel extends Model
      */
     public function merchantIdsWithUnpaidSettlement(): array
     {
-        $rows = $this->select('merchant_id')
-            ->where('status', 'settled')
-            ->where('payout_id', null)
-            ->groupBy('merchant_id')
+        $rows = $this->select('applications.merchant_id')
+            ->join('applications', 'applications.id = transactions.app_id')
+            ->where('transactions.status', 'settled')
+            ->where('transactions.payout_id', null)
+            ->groupBy('applications.merchant_id')
             ->findAll();
 
         return array_map(static fn (array $row) => (int) $row['merchant_id'], $rows);
@@ -74,9 +105,10 @@ class TransactionModel extends Model
      */
     public function totalRevenueForMerchant(int $merchantId): float
     {
-        $row = $this->selectSum('amount')
-            ->where('merchant_id', $merchantId)
-            ->where('status', 'settled')
+        $row = $this->select('SUM(transactions.amount) as amount')
+            ->join('applications', 'applications.id = transactions.app_id')
+            ->where('applications.merchant_id', $merchantId)
+            ->where('transactions.status', 'settled')
             ->first();
 
         return (float) ($row['amount'] ?? 0);

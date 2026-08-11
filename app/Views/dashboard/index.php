@@ -185,6 +185,26 @@
                         <label class="kt-form-label font-normal text-mono" for="amount">Amount (FJD)</label>
                         <input class="kt-input w-40" type="number" id="amount" name="amount" value="50.00" min="1" step="0.01">
                     </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="product_name">Product / service</label>
+                        <input class="kt-input w-52" type="text" id="product_name" name="product_name" placeholder="e.g. Consulting session" value="Demo item" required>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="quantity">Quantity</label>
+                        <input class="kt-input w-24" type="number" id="quantity" name="quantity" value="1" min="0" step="0.01">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="unit_of_measure">Unit</label>
+                        <input class="kt-input w-24" type="text" id="unit_of_measure" name="unit_of_measure" placeholder="pcs">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="unit_price">Unit price (FJD)</label>
+                        <input class="kt-input w-32" type="number" id="unit_price" name="unit_price" min="0" step="0.01">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="kt-form-label font-normal text-mono" for="product_description">Description</label>
+                        <input class="kt-input w-60" type="text" id="product_description" name="product_description" placeholder="Any other detail (optional)">
+                    </div>
                     <button type="submit" class="kt-btn kt-btn-primary">Open Demo Checkout</button>
                 </form>
             </div>

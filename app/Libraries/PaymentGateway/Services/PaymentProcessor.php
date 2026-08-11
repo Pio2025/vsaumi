@@ -19,12 +19,12 @@ class PaymentProcessor
     }
 
     /**
-     * Initiate a payment for a merchant and persist the resulting transaction.
+     * Initiate a payment for an application and persist the resulting transaction.
      *
-     * @param array{id: int} $merchant
-     * @param array{amount: float, currency?: string, customer_email?: string, customer_msisdn?: string} $data
+     * @param array{id: int} $application
+     * @param array{amount: float, currency?: string, customer_email?: string, customer_msisdn?: string, product_name?: string, quantity?: float, unit_of_measure?: string, unit_price?: float, product_description?: string} $data
      */
-    public function initiatePayment(array $merchant, string $paymentMethod, array $data): array
+    public function initiatePayment(array $application, string $paymentMethod, array $data): array
     {
         $adapter   = $this->resolveAdapter($paymentMethod);
         $reference = $this->generateReference($paymentMethod);
@@ -32,16 +32,21 @@ class PaymentProcessor
         $result = $adapter->processPayment($data + ['reference' => $reference]);
 
         $transactionId = $this->transactions->insert([
-            'merchant_id'     => $merchant['id'],
-            'reference'       => $reference,
-            'customer_email'  => $data['customer_email'] ?? null,
-            'customer_msisdn' => $data['customer_msisdn'] ?? null,
-            'amount'          => $data['amount'],
-            'currency'        => $data['currency'] ?? 'FJD',
-            'payment_method'  => $paymentMethod,
-            'status'          => $result['status'] ?? 'pending',
-            'psp_reference'   => $result['psp_reference'] ?? null,
-            'metadata'        => json_encode($data['metadata'] ?? []),
+            'app_id'              => $application['id'],
+            'reference'           => $reference,
+            'customer_email'      => $data['customer_email'] ?? null,
+            'customer_msisdn'     => $data['customer_msisdn'] ?? null,
+            'amount'              => $data['amount'],
+            'currency'            => $data['currency'] ?? 'FJD',
+            'payment_method'      => $paymentMethod,
+            'status'              => $result['status'] ?? 'pending',
+            'psp_reference'       => $result['psp_reference'] ?? null,
+            'metadata'            => json_encode($data['metadata'] ?? []),
+            'product_name'        => $data['product_name'] ?? null,
+            'quantity'            => $data['quantity'] ?? null,
+            'unit_of_measure'     => $data['unit_of_measure'] ?? null,
+            'unit_price'          => $data['unit_price'] ?? null,
+            'product_description' => $data['product_description'] ?? null,
         ], true);
 
         return [

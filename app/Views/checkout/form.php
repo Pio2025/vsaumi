@@ -11,6 +11,11 @@
         <form method="post" action="<?= site_url('checkout/' . $application['api_key'] . '/pay/' . $method) ?>" class="flex flex-col gap-4 p-7.5">
             <?= csrf_field() ?>
             <input type="hidden" name="amount" value="<?= esc($amount) ?>">
+            <?php foreach ($product as $field => $value): ?>
+                <?php if ($value !== null && $value !== ''): ?>
+                    <input type="hidden" name="<?= esc($field, 'attr') ?>" value="<?= esc($value) ?>">
+                <?php endif; ?>
+            <?php endforeach; ?>
 
             <?php if ($methodInfo['kind'] === 'card'): ?>
                 <div class="flex flex-col gap-1">

@@ -66,6 +66,7 @@ class Checkout extends BaseController
             'application' => $ctx['application'],
             'amount'      => $amount,
             'methods'     => $this->methods,
+            'product'     => $this->productFieldsFromGet(),
         ]);
     }
 
@@ -85,7 +86,24 @@ class Checkout extends BaseController
             'amount'      => $amount,
             'method'      => $method,
             'methodInfo'  => $this->methods[$method],
+            'product'     => $this->productFieldsFromGet(),
         ]);
+    }
+
+    /**
+     * Product/service details ride along in the query string the same way
+     * `amount` does, from the dashboard's demo-checkout card through to the
+     * payment form.
+     */
+    protected function productFieldsFromGet(): array
+    {
+        return [
+            'product_name'        => $this->request->getGet('product_name'),
+            'quantity'            => $this->request->getGet('quantity'),
+            'unit_of_measure'     => $this->request->getGet('unit_of_measure'),
+            'unit_price'          => $this->request->getGet('unit_price'),
+            'product_description' => $this->request->getGet('product_description'),
+        ];
     }
 
     public function process(string $apiKey, string $method)
@@ -97,11 +115,14 @@ class Checkout extends BaseController
             return redirect()->to('/')->with('error', 'Invalid checkout request.');
         }
 
-        $merchant = $ctx['merchant'];
-
         $data = [
-            'amount'   => $amount,
-            'currency' => 'FJD',
+            'amount'              => $amount,
+            'currency'            => 'FJD',
+            'product_name'        => $this->request->getPost('product_name') ?: null,
+            'quantity'            => $this->request->getPost('quantity') !== null && $this->request->getPost('quantity') !== '' ? (float) $this->request->getPost('quantity') : null,
+            'unit_of_measure'     => $this->request->getPost('unit_of_measure') ?: null,
+            'unit_price'          => $this->request->getPost('unit_price') !== null && $this->request->getPost('unit_price') !== '' ? (float) $this->request->getPost('unit_price') : null,
+            'product_description' => $this->request->getPost('product_description') ?: null,
         ];
 
         if ($this->methods[$method]['kind'] === 'mobile') {
@@ -112,7 +133,7 @@ class Checkout extends BaseController
         }
 
         $processor = new PaymentProcessor();
-        $result    = $processor->initiatePayment($merchant, $method, $data);
+        $result    = $processor->initiatePayment($ctx['application'], $method, $data);
 
         return redirect()->to('checkout/approve/' . $result['reference']);
     }
@@ -125,7 +146,8 @@ class Checkout extends BaseController
             return redirect()->to('/')->with('error', 'Transaction not found.');
         }
 
-        $merchant = model(MerchantModel::class)->find($transaction['merchant_id']);
+        $application = model(ApplicationModel::class)->find($transaction['app_id']);
+        $merchant    = model(MerchantModel::class)->find($application['merchant_id']);
 
         if ($transaction['status'] !== 'pending') {
             return redirect()->to('checkout/result/' . $reference);
@@ -162,7 +184,8 @@ class Checkout extends BaseController
             return redirect()->to('/')->with('error', 'Transaction not found.');
         }
 
-        $merchant = model(MerchantModel::class)->find($transaction['merchant_id']);
+        $application = model(ApplicationModel::class)->find($transaction['app_id']);
+        $merchant    = model(MerchantModel::class)->find($application['merchant_id']);
 
         return view('checkout/result', [
             'pageTitle'   => 'Payment result',

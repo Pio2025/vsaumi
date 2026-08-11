@@ -60,6 +60,11 @@
                                         <span class="kt-table-col-sort"></span>
                                     </span>
                                 </th>
+                                <th class="text-center">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Actions</span>
+                                    </span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,6 +76,11 @@
                                     <td><?= esc(number_format((float) ($tx['fee_amount'] ?? 0), 2)) ?></td>
                                     <td><span class="kt-badge kt-badge-sm kt-badge-outline <?= status_badge_class($tx['status']) ?>"><?= esc(ucfirst($tx['status'])) ?></span></td>
                                     <td><?= esc($tx['created_at']) ?></td>
+                                    <td class="text-center">
+                                        <a href="<?= site_url('dashboard/transactions/' . $tx['id']) ?>" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-outline" title="View detail">
+                                            <i class="ki-filled ki-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

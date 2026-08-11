@@ -20,10 +20,10 @@ class Dashboard extends BaseController
         $transactions = model(TransactionModel::class);
 
         $stats = [
-            'pending_merchants' => $merchants->where('status', 'pending')->countAllResults(false),
-            'active_merchants'  => $merchants->where('status', 'active')->countAllResults(false),
+            'pending_merchants' => $merchants->where('status', 'pending')->countAllResults(),
+            'active_merchants'  => $merchants->where('status', 'active')->countAllResults(),
             'total_merchants'   => $merchants->countAllResults(),
-            'captured_count'    => $transactions->where('status', 'captured')->countAllResults(false),
+            'captured_count'    => $transactions->where('status', 'captured')->countAllResults(),
             'settled_unpaid'    => count($transactions->merchantIdsWithUnpaidSettlement()),
         ];
 
