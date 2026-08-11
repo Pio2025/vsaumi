@@ -7,6 +7,7 @@ use App\Models\MerchantModel;
 use App\Models\PayoutModel;
 use App\Models\SubscriptionModel;
 use App\Models\TransactionModel;
+use App\Models\WithdrawalRequestModel;
 
 class Dashboard extends BaseController
 {
@@ -31,6 +32,9 @@ class Dashboard extends BaseController
             'pageTitle'    => 'Dashboard',
             'merchant'     => $merchant,
             'stats'        => $stats,
+            'availableBalance' => $txModel->availableBalanceForMerchant($merchant['id']),
+            'totalRevenue'     => $txModel->totalRevenueForMerchant($merchant['id']),
+            'pendingWithdrawal' => model(WithdrawalRequestModel::class)->pendingForMerchant($merchant['id']),
             'subscriptions' => model(SubscriptionModel::class)->allForMerchant($merchant['id']),
             'applications' => model(ApplicationModel::class)->allForMerchant($merchant['id']),
             'newApplicationCredentials' => session()->getFlashdata('new_application_credentials'),

@@ -58,4 +58,27 @@ class TransactionModel extends Model
 
         return array_map(static fn (array $row) => (int) $row['merchant_id'], $rows);
     }
+
+    /**
+     * Net (fee-deducted) balance of settled transactions not yet paid out.
+     */
+    public function availableBalanceForMerchant(int $merchantId): float
+    {
+        $transactions = $this->unpaidSettledForMerchant($merchantId);
+
+        return array_sum(array_column($transactions, 'amount')) - array_sum(array_column($transactions, 'fee_amount'));
+    }
+
+    /**
+     * Gross lifetime revenue from all settled transactions, regardless of payout status.
+     */
+    public function totalRevenueForMerchant(int $merchantId): float
+    {
+        $row = $this->selectSum('amount')
+            ->where('merchant_id', $merchantId)
+            ->where('status', 'settled')
+            ->first();
+
+        return (float) ($row['amount'] ?? 0);
+    }
 }

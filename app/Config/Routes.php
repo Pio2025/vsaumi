@@ -23,6 +23,8 @@ $routes->group('dashboard', ['filter' => 'merchantAuth'], static function (Route
     $routes->get('applications/(:num)/subscriptions/(:num)/invoice', 'ApplicationController::invoice/$1/$2');
     $routes->get('transactions', 'Dashboard::transactions');
     $routes->get('payouts', 'Dashboard::payouts');
+    $routes->get('withdrawals', 'WithdrawalController::index');
+    $routes->post('withdrawals/request', 'WithdrawalController::request');
     $routes->get('subscriptions', 'Dashboard::subscriptions');
     $routes->get('settings', 'SettingsController::index');
     $routes->post('settings', 'SettingsController::update');
@@ -60,6 +62,9 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function (RouteCollect
     $routes->post('settlement/run', 'Admin\Dashboard::runSettlement');
     $routes->get('payouts', 'Admin\Dashboard::payouts');
     $routes->post('payouts/run', 'Admin\Dashboard::runPayouts');
+    $routes->get('withdrawals', 'Admin\WithdrawalController::index');
+    $routes->post('withdrawals/(:num)/approve', 'Admin\WithdrawalController::approve/$1');
+    $routes->post('withdrawals/(:num)/reject', 'Admin\WithdrawalController::reject/$1');
 });
 
 $routes->group('api/v1', static function (RouteCollection $routes) {

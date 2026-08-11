@@ -55,6 +55,27 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-7.5 mt-5 lg:mt-7.5">
+        <div class="kt-card p-5">
+            <span class="text-2sm text-secondary-foreground font-medium">Available balance</span>
+            <div class="text-2xl font-semibold text-mono mt-1.5">$<?= esc(number_format($availableBalance, 2)) ?> FJD</div>
+            <p class="text-xs text-secondary-foreground mt-1 mb-3">Settled funds not yet paid out.</p>
+            <?php if ($pendingWithdrawal): ?>
+                <span class="kt-badge kt-badge-sm kt-badge-outline kt-badge-warning">Withdrawal of $<?= esc(number_format((float) $pendingWithdrawal['amount'], 2)) ?> pending review</span>
+            <?php elseif ($availableBalance > 0): ?>
+                <form method="post" action="<?= site_url('dashboard/withdrawals/request') ?>">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="kt-btn kt-btn-sm kt-btn-primary">Withdraw funds</button>
+                </form>
+            <?php endif; ?>
+        </div>
+        <div class="kt-card p-5">
+            <span class="text-2sm text-secondary-foreground font-medium">Total revenue</span>
+            <div class="text-2xl font-semibold text-mono mt-1.5">$<?= esc(number_format($totalRevenue, 2)) ?> FJD</div>
+            <p class="text-xs text-secondary-foreground mt-1 mb-0">Total settled while using VSaumi.</p>
+        </div>
+    </div>
+
     <div class="kt-card mt-5 lg:mt-7.5">
         <div class="kt-card-content p-6">
             <div class="flex items-center justify-between mb-2">

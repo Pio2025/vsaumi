@@ -8,7 +8,10 @@ if ($isAdmin) {
         ['label' => 'Dashboard', 'icon' => 'element-11', 'url' => 'admin', 'match' => 'admin'],
         ['label' => 'Merchant', 'icon' => 'people', 'url' => 'admin/merchants', 'match' => 'admin/merchants'],
         ['label' => 'Application', 'icon' => 'code', 'url' => 'admin/applications', 'match' => 'admin/applications'],
-        ['label' => 'Payouts', 'icon' => 'wallet', 'url' => 'admin/payouts', 'match' => 'admin/payouts'],
+        ['label' => 'Payout', 'icon' => 'wallet', 'children' => [
+            ['label' => 'Withdrawal Request', 'url' => 'admin/withdrawals', 'match' => 'admin/withdrawals'],
+            ['label' => 'Payouts Listing', 'url' => 'admin/payouts', 'match' => 'admin/payouts'],
+        ]],
     ];
     $displayName = session()->get('admin_name') ?? 'Admin';
     $roleLabel   = 'Administrator';
@@ -18,7 +21,10 @@ if ($isAdmin) {
         ['label' => 'Dashboard', 'icon' => 'home', 'url' => 'dashboard', 'match' => 'dashboard'],
         ['label' => 'Applications', 'icon' => 'code', 'url' => 'dashboard/applications', 'match' => 'dashboard/applications'],
         ['label' => 'Transactions', 'icon' => 'bill', 'url' => 'dashboard/transactions', 'match' => 'dashboard/transactions'],
-        ['label' => 'Payouts', 'icon' => 'wallet', 'url' => 'dashboard/payouts', 'match' => 'dashboard/payouts'],
+        ['label' => 'Payout', 'icon' => 'wallet', 'children' => [
+            ['label' => 'My Withdrawal Request', 'url' => 'dashboard/withdrawals', 'match' => 'dashboard/withdrawals'],
+            ['label' => 'My Payout', 'url' => 'dashboard/payouts', 'match' => 'dashboard/payouts'],
+        ]],
         ['label' => 'Subscriptions', 'icon' => 'crown', 'url' => 'dashboard/subscriptions', 'match' => 'dashboard/subscriptions'],
         ['label' => 'Settings', 'icon' => 'setting-2', 'url' => 'dashboard/settings', 'match' => 'dashboard/settings'],
     ];
@@ -71,17 +77,55 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
             <div class="kt-scrollable-y-hover grow shrink-0 flex ps-2 lg:ps-5 pe-1 lg:pe-3" data-kt-scrollable="true" data-kt-scrollable-height="auto">
                 <div class="kt-menu flex flex-col grow gap-1" data-kt-menu="true" id="sidebar_menu">
                     <?php foreach ($navItems as $item): ?>
-                        <?php $active = ($item['match'] === 'admin' || $item['match'] === 'dashboard') ? ($uriPath === $item['match']) : str_starts_with($uriPath, $item['match']); ?>
-                        <div class="kt-menu-item <?= $active ? 'active' : '' ?>">
-                            <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] ps-[10px] pe-[10px] py-[8px]" href="<?= site_url($item['url']) ?>">
-                                <span class="kt-menu-icon items-start text-muted-foreground kt-menu-item-active:text-primary w-[20px]">
-                                    <i class="ki-filled ki-<?= esc($item['icon'], 'attr') ?> text-lg"></i>
-                                </span>
-                                <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold">
-                                    <?= esc($item['label']) ?>
-                                </span>
-                            </a>
-                        </div>
+                        <?php if (isset($item['children'])): ?>
+                            <?php
+                                $childActive = false;
+                                foreach ($item['children'] as $child) {
+                                    if (str_starts_with($uriPath, $child['match'])) {
+                                        $childActive = true;
+                                        break;
+                                    }
+                                }
+                            ?>
+                            <div class="kt-menu-item <?= $childActive ? 'active show' : '' ?>" data-kt-menu-item-toggle="accordion" data-kt-menu-item-trigger="click">
+                                <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] ps-[10px] pe-[10px] py-[8px] cursor-pointer">
+                                    <span class="kt-menu-icon items-start text-muted-foreground kt-menu-item-active:text-primary w-[20px]">
+                                        <i class="ki-filled ki-<?= esc($item['icon'], 'attr') ?> text-lg"></i>
+                                    </span>
+                                    <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold">
+                                        <?= esc($item['label']) ?>
+                                    </span>
+                                    <span class="kt-menu-arrow text-muted-foreground w-[20px] shrink-0 flex items-center justify-center">
+                                        <i class="ki-filled ki-down text-2xs kt-menu-item-show:hidden"></i>
+                                        <i class="ki-filled ki-up text-2xs hidden kt-menu-item-show:inline-flex"></i>
+                                    </span>
+                                </a>
+                                <div class="kt-menu-accordion gap-1 ps-[10px] <?= $childActive ? 'show' : '' ?>">
+                                    <?php foreach ($item['children'] as $child): ?>
+                                        <?php $active = str_starts_with($uriPath, $child['match']); ?>
+                                        <div class="kt-menu-item <?= $active ? 'active' : '' ?>">
+                                            <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] ps-[10px] pe-[10px] py-[8px]" href="<?= site_url($child['url']) ?>">
+                                                <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold">
+                                                    <?= esc($child['label']) ?>
+                                                </span>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <?php $active = ($item['match'] === 'admin' || $item['match'] === 'dashboard') ? ($uriPath === $item['match']) : str_starts_with($uriPath, $item['match']); ?>
+                            <div class="kt-menu-item <?= $active ? 'active' : '' ?>">
+                                <a class="kt-menu-link border border-transparent items-center grow kt-menu-item-active:bg-accent/60 kt-menu-item-active:rounded-lg hover:bg-accent/60 hover:rounded-lg gap-[10px] ps-[10px] pe-[10px] py-[8px]" href="<?= site_url($item['url']) ?>">
+                                    <span class="kt-menu-icon items-start text-muted-foreground kt-menu-item-active:text-primary w-[20px]">
+                                        <i class="ki-filled ki-<?= esc($item['icon'], 'attr') ?> text-lg"></i>
+                                    </span>
+                                    <span class="kt-menu-title text-sm font-medium text-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold">
+                                        <?= esc($item['label']) ?>
+                                    </span>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -221,6 +265,48 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, cancel subscription',
+            confirmButtonColor: '#be1e2d',
+            cancelButtonColor: '#6b5f5e',
+            cancelButtonText: 'Back',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('submit', 'form.js-approve-form', function (e) {
+        e.preventDefault();
+        const form = this;
+        const itemName = $(form).data('confirm-name') || 'this merchant';
+
+        Swal.fire({
+            title: 'Approve withdrawal?',
+            text: `This will process the payout for ${itemName} and email them that it's on the way.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, approve & process',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('submit', 'form.js-reject-form', function (e) {
+        e.preventDefault();
+        const form = this;
+        const itemName = $(form).data('confirm-name') || 'this merchant';
+
+        Swal.fire({
+            title: 'Reject withdrawal?',
+            text: `This will reject the withdrawal request from ${itemName}. No funds will be moved.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, reject',
             confirmButtonColor: '#be1e2d',
             cancelButtonColor: '#6b5f5e',
             cancelButtonText: 'Back',
