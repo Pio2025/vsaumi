@@ -39,11 +39,13 @@ class WithdrawalController extends BaseController
             return redirect()->to('/dashboard')->with('error', 'You have no available balance to withdraw.');
         }
 
-        $withdrawalModel->insert([
+        $requestId = $withdrawalModel->insert([
             'merchant_id' => $merchant['id'],
             'amount'      => $balance,
             'status'      => 'pending',
-        ]);
+        ], true);
+
+        model(TransactionModel::class)->snapshotForWithdrawalRequest($requestId, $merchant['id']);
 
         return redirect()->to('/dashboard')->with('success', 'Withdrawal request submitted for FJD ' . number_format($balance, 2) . ' — an admin will review it shortly.');
     }

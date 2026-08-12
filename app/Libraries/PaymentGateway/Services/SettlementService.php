@@ -50,6 +50,21 @@ class SettlementService
     }
 
     /**
+     * Settle an explicit, already-fetched list of captured transactions —
+     * used by the withdrawal-approval flow, which must settle only the
+     * transactions snapshotted against that specific request, not every
+     * captured transaction the merchant happens to have by approval time.
+     *
+     * @param list<array<string, mixed>> $transactions
+     *
+     * @return array{settled_count: int, total_amount: float, total_fees: float}
+     */
+    public function settleTransactions(array $transactions): array
+    {
+        return $this->settle($transactions);
+    }
+
+    /**
      * @param list<array<string, mixed>> $captured
      *
      * @return array{settled_count: int, total_amount: float, total_fees: float}

@@ -18,6 +18,7 @@ if (! function_exists('status_badge_class')) {
             'expired'    => 'kt-badge-destructive',
             'processed'  => 'kt-badge-success',
             'rejected'   => 'kt-badge-destructive',
+            'voided'     => 'kt-badge-secondary',
         ];
 
         return $map[$status] ?? 'kt-badge-secondary';

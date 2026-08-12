@@ -119,6 +119,58 @@ class TransactionModel extends Model
     }
 
     /**
+     * Snapshot the merchant's currently earned-unpaid transactions against a
+     * withdrawal request at the moment it's created, so the admin "View"
+     * detail and the approve/reject actions later act on exactly what was
+     * requested rather than a live re-query that could drift if more sales
+     * land before the admin acts on it.
+     */
+    public function snapshotForWithdrawalRequest(int $withdrawalRequestId, int $merchantId): void
+    {
+        $transactions = $this->unpaidEarnedForMerchant($merchantId);
+
+        if ($transactions === []) {
+            return;
+        }
+
+        $rows = array_map(static fn (array $transaction): array => [
+            'withdrawal_request_id' => $withdrawalRequestId,
+            'transaction_id'        => $transaction['id'],
+            'created_at'            => date('Y-m-d H:i:s'),
+        ], $transactions);
+
+        $this->db->table('withdrawal_request_transactions')->insertBatch($rows);
+    }
+
+    /**
+     * The exact transactions snapshotted against a withdrawal request —
+     * what "View" shows, and what approve()/reject() act on, regardless of
+     * any status changes to those transactions since.
+     */
+    public function forWithdrawalRequest(int $withdrawalRequestId): array
+    {
+        return $this->select('transactions.*')
+            ->join('withdrawal_request_transactions', 'withdrawal_request_transactions.transaction_id = transactions.id')
+            ->where('withdrawal_request_transactions.withdrawal_request_id', $withdrawalRequestId)
+            ->findAll();
+    }
+
+    /**
+     * Marks transactions as 'voided' — an admin forfeiting a rejected
+     * withdrawal request's funds. Excluded from every balance/settlement/
+     * payout query going forward, since those all whitelist specific
+     * statuses rather than exclude one.
+     */
+    public function voidTransactions(array $transactionIds): int
+    {
+        foreach ($transactionIds as $id) {
+            $this->update($id, ['status' => 'voided']);
+        }
+
+        return count($transactionIds);
+    }
+
+    /**
      * Gross lifetime revenue from all settled transactions, regardless of payout status.
      */
     public function totalRevenueForMerchant(int $merchantId): float

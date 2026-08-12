@@ -308,27 +308,6 @@ $initials = strtoupper(substr(trim((string) $displayName) ?: 'V', 0, 1));
         });
     });
 
-    $(document).on('submit', 'form.js-reject-form', function (e) {
-        e.preventDefault();
-        const form = this;
-        const itemName = $(form).data('confirm-name') || 'this merchant';
-
-        Swal.fire({
-            title: 'Reject withdrawal?',
-            text: `This will reject the withdrawal request from ${itemName}. No funds will be moved.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, reject',
-            confirmButtonColor: '#be1e2d',
-            cancelButtonColor: '#6b5f5e',
-            cancelButtonText: 'Back',
-            reverseButtons: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
-        });
-    });
 </script>
 <?= $this->renderSection('scripts') ?>
 </body>

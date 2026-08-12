@@ -48,8 +48,39 @@ class PayoutService
      */
     public function processForMerchant(int $merchantId): ?array
     {
-        $transactions = $this->transactions->unpaidSettledForMerchant($merchantId);
+        return $this->bundle($merchantId, $this->transactions->unpaidSettledForMerchant($merchantId));
+    }
 
+    /**
+     * Bundles a specific, already-settled set of transactions into a
+     * payout — used by the withdrawal-approval flow, which must pay out
+     * only the transactions snapshotted against that request, not every
+     * settled-unpaid transaction the merchant happens to have by then.
+     *
+     * @param list<int> $transactionIds
+     *
+     * @return array{merchant_id: int, payout_id: int, net_amount: float, transaction_count: int}|null
+     */
+    public function processTransactions(int $merchantId, array $transactionIds): ?array
+    {
+        if ($transactionIds === []) {
+            return null;
+        }
+
+        $transactions = $this->transactions
+            ->whereIn('id', $transactionIds)
+            ->where('status', 'settled')
+            ->where('payout_id', null)
+            ->findAll();
+
+        return $this->bundle($merchantId, $transactions);
+    }
+
+    /**
+     * @return array{merchant_id: int, payout_id: int, net_amount: float, transaction_count: int}|null
+     */
+    protected function bundle(int $merchantId, array $transactions): ?array
+    {
         if ($transactions === []) {
             return null;
         }

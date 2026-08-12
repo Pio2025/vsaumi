@@ -18,6 +18,7 @@ class WithdrawalRequestModel extends Model
         'status',
         'payout_id',
         'admin_note',
+        'fund_disposition',
     ];
 
     public function pendingForMerchant(int $merchantId): ?array
