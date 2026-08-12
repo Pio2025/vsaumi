@@ -11,6 +11,7 @@ if ($isAdmin) {
         ['label' => 'Payout', 'icon' => 'wallet', 'children' => [
             ['label' => 'Withdrawal Request', 'url' => 'admin/withdrawals', 'match' => 'admin/withdrawals'],
             ['label' => 'Payouts Listing', 'url' => 'admin/payouts', 'match' => 'admin/payouts'],
+            ['label' => 'Disbursement Listing', 'url' => 'admin/disbursements', 'match' => 'admin/disbursements'],
         ]],
     ];
     $displayName = session()->get('admin_name') ?? 'Admin';

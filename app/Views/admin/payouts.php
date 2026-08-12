@@ -1,9 +1,7 @@
 <?= $this->extend('layout/main') ?>
 <?= $this->section('pageActions') ?>
-<form method="post" action="<?= site_url('admin/payouts/run') ?>">
-    <?= csrf_field() ?>
-    <button type="submit" class="kt-btn kt-btn-primary">Run Payout Batch</button>
-</form>
+<a href="<?= site_url('admin/disbursements/run') ?>" class="kt-btn kt-btn-mono">Run Disbursement Batch</a>
+<a href="<?= site_url('admin/payouts/run') ?>" class="kt-btn kt-btn-primary">Run Payout Batch</a>
 <a href="<?= site_url('admin') ?>" class="kt-btn kt-btn-outline">Back to dashboard</a>
 <?= $this->endSection() ?>
 

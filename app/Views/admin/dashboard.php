@@ -40,10 +40,7 @@
                 <h3 class="text-base font-medium text-mono mb-1.5">Payouts</h3>
                 <p class="text-2sm text-secondary-foreground"><?= esc($stats['settled_unpaid']) ?> merchant(s) currently have unpaid settled funds.</p>
             </div>
-            <form method="post" action="<?= site_url('admin/payouts/run') ?>">
-                <?= csrf_field() ?>
-                <button type="submit" class="kt-btn kt-btn-mono justify-center w-full">Run Payout Batch</button>
-            </form>
+            <a href="<?= site_url('admin/payouts/run') ?>" class="kt-btn kt-btn-mono justify-center w-full">Run Payout Batch</a>
         </div>
     </div>
 

@@ -62,7 +62,12 @@ $routes->group('admin', ['filter' => 'adminAuth'], static function (RouteCollect
     $routes->post('applications/(:num)/activate', 'Admin\ApplicationController::activatePlan/$1');
     $routes->post('settlement/run', 'Admin\Dashboard::runSettlement');
     $routes->get('payouts', 'Admin\Dashboard::payouts');
+    $routes->get('payouts/run', 'Admin\Dashboard::payoutsRunPreview');
     $routes->post('payouts/run', 'Admin\Dashboard::runPayouts');
+    $routes->get('disbursements', 'Admin\DisbursementController::index');
+    $routes->get('disbursements/run', 'Admin\DisbursementController::runForm');
+    $routes->post('disbursements/run', 'Admin\DisbursementController::run');
+    $routes->get('disbursements/(:num)/report', 'Admin\DisbursementController::report/$1');
     $routes->get('withdrawals', 'Admin\WithdrawalController::index');
     $routes->post('withdrawals/(:num)/approve', 'Admin\WithdrawalController::approve/$1');
     $routes->post('withdrawals/(:num)/reject', 'Admin\WithdrawalController::reject/$1');

@@ -233,6 +233,36 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function payoutsRunPreview()
+    {
+        $transactions   = model(TransactionModel::class);
+        $merchantModel  = model(MerchantModel::class);
+        $merchantIds    = $transactions->merchantIdsWithUnpaidSettlement();
+
+        $rows = [];
+
+        foreach ($merchantIds as $merchantId) {
+            $merchantTransactions = $transactions->unpaidSettledForMerchant($merchantId);
+            $totalAmount          = array_sum(array_column($merchantTransactions, 'amount'));
+            $totalFees            = array_sum(array_column($merchantTransactions, 'fee_amount'));
+            $merchant             = $merchantModel->find($merchantId);
+
+            $rows[] = [
+                'merchant_id'       => $merchantId,
+                'business_name'     => $merchant['business_name'] ?? 'Unknown',
+                'transaction_count' => count($merchantTransactions),
+                'total_amount'      => $totalAmount,
+                'total_fees'        => $totalFees,
+                'net_amount'        => $totalAmount - $totalFees,
+            ];
+        }
+
+        return view('admin/payouts_run_preview', [
+            'pageTitle' => 'Run Payout Batch',
+            'rows'      => $rows,
+        ]);
+    }
+
     public function runPayouts()
     {
         $result = (new PayoutService())->processPayouts();
