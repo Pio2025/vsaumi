@@ -34,10 +34,34 @@ class DisbursementReportPdfGenerator
 
         $grandTotal = array_sum(array_column($items, 'amount'));
 
+        $logoPath   = FCPATH . 'assets/logo/logo_small.png';
+        $logoWidth  = 32;
+        $logoHeight = $logoWidth * (80 / 406);
+        $logoCell   = '&nbsp;';
+
+        // TCPDF's HTML table cells render text ~4mm right of the page margin
+        // even with cellpadding="0", so the logo is nudged to match rather
+        // than the left margin, keeping it flush with the rest of the report.
+        $contentX = 22;
+
+        if (is_file($logoPath)) {
+            $pdf->Image($logoPath, $contentX, 15, $logoWidth, $logoHeight, 'PNG', '', 'T', false, 300);
+
+            $pdf->SetXY($contentX, 15 + $logoHeight + 2);
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->SetTextColor(102, 102, 102);
+            $pdf->Cell(0, 4, 'Disbursement Run Sheet', 0, 0, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('helvetica', '', 10);
+            $pdf->SetXY(18, 18);
+        } else {
+            $logoCell = '<h1 style="font-size:20px;margin:0;">VSaumi</h1><span style="color:#666;">Disbursement Run Sheet</span>';
+        }
+
         $html = '
             <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="50%"><h1 style="font-size:20px;margin:0;">VSaumi</h1><span style="color:#666;">Disbursement Run Sheet</span></td>
+                    <td width="50%">' . $logoCell . '</td>
                     <td width="50%" style="text-align:right;">
                         <h2 style="font-size:16px;margin:0;">' . esc($batch['reference']) . '</h2>
                         <span style="color:#666;">Generated ' . esc(date('Y-m-d H:i')) . '</span><br>
