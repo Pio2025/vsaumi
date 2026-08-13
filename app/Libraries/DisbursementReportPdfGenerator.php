@@ -123,7 +123,8 @@ class DisbursementReportPdfGenerator
         }
 
         $html .= '
-            <table cellpadding="6" cellspacing="0" width="100%" border="0" style="margin-top:8px;">
+            <br><br>
+            <table cellpadding="6" cellspacing="0" width="100%" border="0" style="border-top:2px solid #ccc;">
                 <tr style="background-color:#f1f1f1;">
                     <td style="text-align:right;"><strong>Batch total</strong></td>
                     <td width="25%" style="text-align:right;"><strong>$' . esc(number_format((float) $grandTotal, 2)) . '</strong></td>
