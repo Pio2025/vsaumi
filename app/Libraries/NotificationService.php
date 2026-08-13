@@ -5,6 +5,34 @@ namespace App\Libraries;
 class NotificationService
 {
     /**
+     * Acknowledges a new merchant signup, explains the admin approval step
+     * ahead, and gives them a contact point for questions. Never throws — a
+     * broken mail transport must not block signup.
+     */
+    public function sendMerchantRegistrationAcknowledgement(array $merchant): bool
+    {
+        try {
+            $email = service('email');
+
+            $email->setTo($merchant['contact_email']);
+            $email->setSubject('Welcome to VSaumi — your account is being reviewed');
+            $email->setMessage(
+                "Hi {$merchant['business_name']},\n\n" .
+                "Thanks for signing up with VSaumi. Your merchant account has been created and is now pending review by our admin team.\n\n" .
+                "Once approved, you'll be able to go live and start accepting payments through your application. We'll let you know as soon as that happens.\n\n" .
+                "Questions in the meantime? Reach us at support@vsaumi.com.\n\n" .
+                "— VSaumi"
+            );
+
+            return $email->send();
+        } catch (\Throwable $e) {
+            log_message('error', 'Failed to send registration-acknowledgement email: ' . $e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
      * Notifies a merchant that their withdrawal request has been approved and
      * is being processed. Never throws — a broken mail transport must not
      * block the admin approval flow.

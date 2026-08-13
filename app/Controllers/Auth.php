@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\NotificationService;
 use App\Libraries\PaymentGateway\Helpers\SecurityHelper;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
@@ -109,6 +110,8 @@ class Auth extends BaseController
         }
 
         $merchant = $merchants->find($merchantId);
+
+        (new NotificationService())->sendMerchantRegistrationAcknowledgement($merchant);
 
         session()->set([
             'merchant_id'   => $merchant['id'],
