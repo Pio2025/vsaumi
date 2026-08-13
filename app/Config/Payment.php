@@ -23,11 +23,11 @@ class Payment extends BaseConfig
     public string $cardApiKey    = '';
     public string $cardApiSecret = '';
 
-    // --- Vodafone M-PAiSA ---
-    public string $mpaisaApiUrl      = '';
-    public string $mpaisaApiKey      = '';
-    public string $mpaisaMerchantId  = '';
-    public string $mpaisaWebhookSecret = '';
+    // --- Vodafone M-PAiSA Payments Gateway (staging by default) ---
+    public string $mpaisaBaseUrl        = 'https://payments-staging.m-paisa.com';
+    public string $mpaisaClientId       = '';
+    public string $mpaisaClientSecret   = '';
+    public string $mpaisaMerchantSecret = '';
 
     // --- Digicel MyCash ---
     public string $mycashApiUrl         = '';

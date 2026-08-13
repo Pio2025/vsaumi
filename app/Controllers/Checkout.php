@@ -135,6 +135,10 @@ class Checkout extends BaseController
         $processor = new PaymentProcessor();
         $result    = $processor->initiatePayment($ctx['application'], $method, $data);
 
+        if (! empty($result['redirect_url'])) {
+            return redirect()->to($result['redirect_url']);
+        }
+
         return redirect()->to('checkout/approve/' . $result['reference']);
     }
 
@@ -174,6 +178,30 @@ class Checkout extends BaseController
         }
 
         return redirect()->to('checkout/result/' . $reference);
+    }
+
+    /**
+     * Where M-PAiSA sends the customer's browser back to after they
+     * approve/decline/abandon payment on Vodafone's hosted page. Vodafone
+     * signs this callback (tokenv2) rather than calling us server-to-server,
+     * so verification happens here before the transaction is ever trusted
+     * as resolved — see PaymentProcessor::completeMpaisaRedirect().
+     */
+    public function mpaisaReturn()
+    {
+        $params = $this->request->getMethod() === 'post'
+            ? $this->request->getPost()
+            : $this->request->getGet();
+
+        $processor = new PaymentProcessor();
+
+        try {
+            $transaction = $processor->completeMpaisaRedirect($params);
+        } catch (\RuntimeException $e) {
+            return redirect()->to('/')->with('error', $e->getMessage());
+        }
+
+        return redirect()->to('checkout/result/' . $transaction['reference']);
     }
 
     public function result(string $reference)

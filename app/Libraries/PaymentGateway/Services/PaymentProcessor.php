@@ -2,6 +2,7 @@
 
 namespace App\Libraries\PaymentGateway\Services;
 
+use App\Libraries\PaymentGateway\Adapters\MPaisaAdapter;
 use App\Libraries\PaymentGateway\Core\Interfaces\PaymentGatewayInterface;
 use App\Models\ApplicationModel;
 use App\Models\MerchantModel;
@@ -34,6 +35,8 @@ class PaymentProcessor
 
         $result = $adapter->processPayment($data + ['reference' => $reference]);
 
+        $metadata = array_merge($data['metadata'] ?? [], $result['metadata'] ?? []);
+
         $transactionId = $this->transactions->insert([
             'app_id'              => $application['id'],
             'reference'           => $reference,
@@ -44,7 +47,7 @@ class PaymentProcessor
             'payment_method'      => $paymentMethod,
             'status'              => $result['status'] ?? 'pending',
             'psp_reference'       => $result['psp_reference'] ?? null,
-            'metadata'            => json_encode($data['metadata'] ?? []),
+            'metadata'            => json_encode($metadata),
             'product_name'        => $data['product_name'] ?? null,
             'quantity'            => $data['quantity'] ?? null,
             'unit_of_measure'     => $data['unit_of_measure'] ?? null,
@@ -58,6 +61,7 @@ class PaymentProcessor
             'psp_reference'  => $result['psp_reference'] ?? null,
             'status'         => $result['status'] ?? 'pending',
             'message'        => $result['message'] ?? '',
+            'redirect_url'   => $result['redirect_url'] ?? null,
         ];
     }
 
@@ -82,6 +86,54 @@ class PaymentProcessor
         $this->transactions->update($transaction['id'], ['status' => $outcome]);
 
         if ($outcome === 'captured') {
+            $this->maybeSendReceipt($transaction);
+        }
+
+        return $this->transactions->find($transaction['id']);
+    }
+
+    /**
+     * Handles M-PAiSA's signed browser-redirect callback — this API has no
+     * server-to-server webhook, so this is the real completion signal.
+     * Looks up the transaction by the tID it echoes back, then verifies
+     * tokenv2 (constant-time) before trusting anything else in the query
+     * string, since it arrives via the customer's own browser and could be
+     * replayed or tampered with in transit.
+     *
+     * Idempotent: a transaction already resolved out of 'pending' (e.g. the
+     * customer double-submits, or hits back and reloads) is returned as-is
+     * without re-verifying or re-applying anything.
+     */
+    public function completeMpaisaRedirect(array $params): array
+    {
+        $reference   = (string) ($params['tID'] ?? '');
+        $transaction = $this->transactions->findByReference($reference);
+
+        if ($transaction === null) {
+            throw new RuntimeException("No transaction found for reference: {$reference}");
+        }
+
+        if ($transaction['status'] !== 'pending') {
+            return $transaction;
+        }
+
+        $adapter = new MPaisaAdapter();
+
+        if (! $adapter->verifyRedirectSignature($transaction, $params)) {
+            log_message('critical', 'M-PAiSA redirect signature verification FAILED for reference ' . $reference . ' — possible tampering, marking failed.');
+            $this->transactions->update($transaction['id'], ['status' => 'failed']);
+
+            return $this->transactions->find($transaction['id']);
+        }
+
+        $status = $adapter->mapResponseCode((string) ($params['rCode'] ?? ''));
+
+        $this->transactions->update($transaction['id'], [
+            'status'        => $status,
+            'psp_reference' => $params['rID'] ?? $transaction['psp_reference'],
+        ]);
+
+        if ($status === 'captured') {
             $this->maybeSendReceipt($transaction);
         }
 

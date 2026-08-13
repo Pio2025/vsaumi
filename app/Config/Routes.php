@@ -38,6 +38,7 @@ $routes->group('checkout', static function (RouteCollection $routes) {
     $routes->post('(:segment)/pay/(:segment)', 'Checkout::process/$1/$2');
     $routes->get('approve/(:segment)', 'Checkout::approve/$1');
     $routes->post('approve/(:segment)', 'Checkout::confirm/$1');
+    $routes->match(['get', 'post'], 'mpaisa/return', 'Checkout::mpaisaReturn');
     $routes->get('result/(:segment)', 'Checkout::result/$1');
 });
 

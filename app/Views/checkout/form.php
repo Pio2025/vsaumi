@@ -42,7 +42,11 @@
                     <label class="kt-form-label font-normal text-mono" for="msisdn">Mobile number</label>
                     <input class="kt-input" type="tel" id="msisdn" name="msisdn" value="9791234567" required>
                 </div>
-                <span class="text-2sm text-secondary-foreground">You'll be sent a demo approval prompt on the next screen, simulating the <?= esc($methodInfo['label']) ?> app popup on your phone.</span>
+                <?php if ($method === 'mpaisa'): ?>
+                    <span class="text-2sm text-secondary-foreground">You'll be redirected to M-PAiSA to log in and approve this payment.</span>
+                <?php else: ?>
+                    <span class="text-2sm text-secondary-foreground">You'll be sent a demo approval prompt on the next screen, simulating the <?= esc($methodInfo['label']) ?> app popup on your phone.</span>
+                <?php endif; ?>
             <?php endif; ?>
 
             <button type="submit" class="kt-btn kt-btn-primary flex justify-center grow">Pay <?= esc(number_format($amount, 2)) ?> FJD</button>
