@@ -2,8 +2,11 @@
 
 namespace App\Libraries\PaymentGateway\Services;
 
+use App\Libraries\NotificationService;
+use App\Models\MerchantModel;
 use App\Models\PayoutModel;
 use App\Models\TransactionModel;
+use App\Models\WithdrawalRequestModel;
 
 /**
  * Batches each merchant's settled, unpaid transactions into a payout
@@ -16,11 +19,19 @@ class PayoutService
 {
     protected TransactionModel $transactions;
     protected PayoutModel $payouts;
+    protected WithdrawalRequestModel $withdrawalRequests;
+    protected MerchantModel $merchants;
 
-    public function __construct(?TransactionModel $transactions = null, ?PayoutModel $payouts = null)
-    {
-        $this->transactions = $transactions ?? model(TransactionModel::class);
-        $this->payouts       = $payouts ?? model(PayoutModel::class);
+    public function __construct(
+        ?TransactionModel $transactions = null,
+        ?PayoutModel $payouts = null,
+        ?WithdrawalRequestModel $withdrawalRequests = null,
+        ?MerchantModel $merchants = null
+    ) {
+        $this->transactions       = $transactions ?? model(TransactionModel::class);
+        $this->payouts            = $payouts ?? model(PayoutModel::class);
+        $this->withdrawalRequests = $withdrawalRequests ?? model(WithdrawalRequestModel::class);
+        $this->merchants          = $merchants ?? model(MerchantModel::class);
     }
 
     /**
@@ -48,7 +59,13 @@ class PayoutService
      */
     public function processForMerchant(int $merchantId): ?array
     {
-        return $this->bundle($merchantId, $this->transactions->unpaidSettledForMerchant($merchantId));
+        $result = $this->bundle($merchantId, $this->transactions->unpaidSettledForMerchant($merchantId));
+
+        if ($result !== null) {
+            $this->resolveFullyCoveredWithdrawal($merchantId, $result['payout_id']);
+        }
+
+        return $result;
     }
 
     /**
@@ -109,5 +126,48 @@ class PayoutService
             'net_amount'        => $netAmount,
             'transaction_count' => count($transactions),
         ];
+    }
+
+    /**
+     * A bulk payout run (the admin "Run Payout Batch" button, or the
+     * scheduled ProcessPayouts command) has no visibility into a merchant's
+     * pending withdrawal request — it just bundles whatever settled/unpaid
+     * transactions it finds. If that happens to include every transaction
+     * snapshotted against a pending request, resolve that request as
+     * processed now, using this same payout. Otherwise the admin's later
+     * explicit approve() would find those transactions already paid out
+     * (payout_id no longer null) and wrongly auto-reject the request for
+     * having nothing left to process.
+     */
+    protected function resolveFullyCoveredWithdrawal(int $merchantId, int $payoutId): void
+    {
+        $pending = $this->withdrawalRequests->pendingForMerchant($merchantId);
+
+        if ($pending === null) {
+            return;
+        }
+
+        $snapshotted = $this->transactions->forWithdrawalRequest($pending['id']);
+
+        if ($snapshotted === []) {
+            return;
+        }
+
+        foreach ($snapshotted as $transaction) {
+            if ($transaction['payout_id'] === null) {
+                return;
+            }
+        }
+
+        $this->withdrawalRequests->update($pending['id'], [
+            'status'    => 'processed',
+            'payout_id' => $payoutId,
+        ]);
+
+        $merchant = $this->merchants->find($merchantId);
+
+        if ($merchant !== null) {
+            (new NotificationService())->sendWithdrawalProcessing($merchant, $pending);
+        }
     }
 }
